@@ -4,12 +4,6 @@ import { useId, type ReactNode, type SelectHTMLAttributes } from "react"
 import { AlertOctagon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-/**
- * Shared form primitives for the assessment wizard.
- * Every control renders a visible label, hint, and inline error;
- * red-flag questions get prominent non-colour-only treatment.
- */
-
 interface FieldShellProps {
   label: string
   hint?: string
@@ -26,7 +20,7 @@ function FieldShell({ label, hint, error, required, children }: FieldShellProps)
     [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ") || undefined
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex min-w-0 flex-col gap-1.5">
       <label htmlFor={inputId} className="text-sm font-medium text-foreground">
         {label}
         {required && (
@@ -82,9 +76,9 @@ export function TextField({
           placeholder={placeholder}
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(event) => onChange(event.target.value)}
           className={cn(
-            "h-10 rounded-lg border bg-surface px-3 text-sm text-foreground placeholder:text-subtle",
+            "min-h-11 w-full rounded-lg border bg-surface px-3 text-sm text-foreground outline-none placeholder:text-subtle focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
             error ? "border-urgency-referral" : "border-border-strong",
           )}
         />
@@ -103,7 +97,6 @@ interface NumberFieldProps {
   min?: number
   max?: number
   step?: number
-  /** When false, an empty input maps to null instead of 0 */
   emptyAsZero?: boolean
 }
 
@@ -132,8 +125,8 @@ export function NumberField({
           step={step}
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
-          onChange={(e) => {
-            const raw = e.target.value
+          onChange={(event) => {
+            const raw = event.target.value
             if (raw === "") {
               onChange(emptyAsZero ? 0 : null)
               return
@@ -142,7 +135,7 @@ export function NumberField({
             onChange(Number.isNaN(parsed) ? null : parsed)
           }}
           className={cn(
-            "h-10 w-32 rounded-lg border bg-surface px-3 text-sm tabular-nums text-foreground",
+            "min-h-11 w-full max-w-40 rounded-lg border bg-surface px-3 text-sm tabular-nums text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
             error ? "border-urgency-referral" : "border-border-strong",
           )}
         />
@@ -178,20 +171,104 @@ export function SelectField({
           value={value}
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(event) => onChange(event.target.value)}
           className={cn(
-            "h-10 w-full max-w-xs rounded-lg border bg-surface px-3 text-sm text-foreground",
+            "min-h-11 w-full max-w-xs rounded-lg border bg-surface px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
             error ? "border-urgency-referral" : "border-border-strong",
           )}
         >
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
       )}
     </FieldShell>
+  )
+}
+
+interface RadioCardFieldProps<T extends string> {
+  label: string
+  value: T
+  onChange: (value: T) => void
+  options: { value: T; label: string; description?: string }[]
+  hint?: string
+  error?: string
+  required?: boolean
+}
+
+export function RadioCardField<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
+  hint,
+  error,
+  required,
+}: RadioCardFieldProps<T>) {
+  const name = useId()
+  const legendId = useId()
+  const hintId = useId()
+  const errorId = useId()
+  const describedBy =
+    [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ") || undefined
+
+  return (
+    <fieldset className="flex min-w-0 flex-col gap-2 border-0 p-0" aria-describedby={describedBy}>
+      <legend id={legendId} className="text-sm font-medium text-foreground">
+        {label}
+        {required && (
+          <span aria-hidden="true" className="text-urgency-referral">
+            {" *"}
+          </span>
+        )}
+      </legend>
+      {hint && (
+        <p id={hintId} className="text-xs leading-relaxed text-muted">
+          {hint}
+        </p>
+      )}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {options.map((option) => {
+          const inputId = `${name}-${option.value}`
+          return (
+            <label
+              key={option.value}
+              htmlFor={inputId}
+              className={cn(
+                "flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2",
+                value === option.value
+                  ? "border-primary bg-primary-soft text-primary"
+                  : "border-border-strong bg-surface text-foreground hover:border-primary",
+              )}
+            >
+              <input
+                id={inputId}
+                name={name}
+                type="radio"
+                value={option.value}
+                checked={value === option.value}
+                aria-invalid={error ? true : undefined}
+                onChange={() => onChange(option.value)}
+                className="size-4 shrink-0 accent-primary"
+              />
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="font-medium">{option.label}</span>
+                {option.description && (
+                  <span className="text-xs leading-relaxed text-muted">{option.description}</span>
+                )}
+              </span>
+            </label>
+          )
+        })}
+      </div>
+      {error && (
+        <p id={errorId} role="alert" className="text-xs font-medium text-urgency-referral">
+          {error}
+        </p>
+      )}
+    </fieldset>
   )
 }
 
@@ -201,9 +278,7 @@ interface YesNoFieldProps {
   onChange: (value: boolean) => void
   hint?: string
   error?: string
-  /** Marks a red-flag question — rendered with prominent treatment */
   redFlag?: boolean
-  /** Allow a third "unknown" answer mapping to null */
   allowUnknown?: boolean
   onUnknown?: () => void
 }
@@ -218,44 +293,38 @@ export function YesNoField({
   allowUnknown,
   onUnknown,
 }: YesNoFieldProps) {
-  const groupId = useId()
+  const groupName = useId()
+  const labelId = useId()
   const hintId = useId()
-
-  const options: { label: string; selected: boolean; onSelect: () => void }[] = [
-    { label: "Yes", selected: value === true, onSelect: () => onChange(true) },
-    { label: "No", selected: value === false, onSelect: () => onChange(false) },
+  const errorId = useId()
+  const describedBy =
+    [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ") || undefined
+  const options = [
+    { label: "Yes", value: "yes", selected: value === true, onSelect: () => onChange(true) },
+    { label: "No", value: "no", selected: value === false, onSelect: () => onChange(false) },
+    ...(allowUnknown
+      ? [{ label: "Unknown", value: "unknown", selected: value === null, onSelect: () => onUnknown?.() }]
+      : []),
   ]
-  if (allowUnknown) {
-    options.push({
-      label: "Unknown",
-      selected: value === null,
-      onSelect: () => onUnknown?.(),
-    })
-  }
 
   return (
-    <div
-      role="radiogroup"
-      aria-labelledby={groupId}
-      aria-describedby={hint ? hintId : undefined}
+    <fieldset
+      aria-labelledby={labelId}
+      aria-describedby={describedBy}
       className={cn(
-        "flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
-        redFlag
-          ? value === true
-            ? "border-urgency-referral-border bg-urgency-referral-soft"
-            : "border-border-strong bg-surface"
-          : "border-border bg-surface",
+        "flex min-w-0 flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+        redFlag && value === true
+          ? "border-urgency-referral-border bg-urgency-referral-soft"
+          : redFlag
+            ? "border-border-strong bg-surface"
+            : "border-border bg-surface",
       )}
     >
+      <legend className="sr-only">{label}</legend>
       <div className="flex min-w-0 flex-col gap-0.5">
-        <span id={groupId} className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-          {redFlag && (
-            <AlertOctagon
-              aria-hidden="true"
-              className="size-4 shrink-0 text-urgency-referral"
-            />
-          )}
-          {label}
+        <span id={labelId} className="flex items-start gap-1.5 text-sm font-medium text-foreground">
+          {redFlag && <AlertOctagon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-urgency-referral" />}
+          <span>{label}</span>
           {redFlag && <span className="sr-only">(red-flag symptom)</span>}
         </span>
         {hint && (
@@ -264,33 +333,43 @@ export function YesNoField({
           </span>
         )}
         {error && (
-          <span role="alert" className="text-xs font-medium text-urgency-referral">
+          <span id={errorId} role="alert" className="text-xs font-medium text-urgency-referral">
             {error}
           </span>
         )}
       </div>
-      <div className="flex shrink-0 gap-1.5">
-        {options.map((opt) => (
-          <button
-            key={opt.label}
-            type="button"
-            role="radio"
-            aria-checked={opt.selected}
-            onClick={opt.onSelect}
-            className={cn(
-              "h-8 rounded-md border px-3.5 text-sm font-medium transition-colors",
-              opt.selected
-                ? redFlag && opt.label === "Yes"
-                  ? "border-urgency-referral bg-urgency-referral text-white"
-                  : "border-primary bg-primary text-primary-foreground"
-                : "border-border-strong bg-surface text-muted hover:bg-primary-soft hover:text-primary",
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
+      <div className="flex min-w-0 flex-wrap gap-1.5">
+        {options.map((option) => {
+          const inputId = `${groupName}-${option.value}`
+          return (
+            <label
+              key={option.value}
+              htmlFor={inputId}
+              className={cn(
+                "flex min-h-11 cursor-pointer items-center rounded-md border px-3.5 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2",
+                option.selected
+                  ? redFlag && option.value === "yes"
+                    ? "border-urgency-referral bg-urgency-referral text-white"
+                    : "border-primary bg-primary text-primary-foreground"
+                  : "border-border-strong bg-surface text-muted hover:bg-primary-soft hover:text-primary",
+              )}
+            >
+              <input
+                id={inputId}
+                name={groupName}
+                type="radio"
+                value={option.value}
+                checked={option.selected}
+                aria-invalid={error ? true : undefined}
+                onChange={option.onSelect}
+                className="sr-only"
+              />
+              {option.label}
+            </label>
+          )
+        })}
       </div>
-    </div>
+    </fieldset>
   )
 }
 
@@ -310,28 +389,29 @@ export function CheckboxField({ label, checked, onChange, hint, error }: Checkbo
     [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ") || undefined
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-start gap-2.5">
+    <div className="flex min-w-0 flex-col gap-1.5">
+      <label
+        htmlFor={inputId}
+        className="flex min-h-11 cursor-pointer items-start gap-2.5 rounded-md focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
+      >
         <input
           id={inputId}
           type="checkbox"
           checked={checked}
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
-          onChange={(e) => onChange(e.target.checked)}
-          className="mt-0.5 size-4 shrink-0 rounded border-border-strong"
+          onChange={(event) => onChange(event.target.checked)}
+          className="mt-1 size-5 shrink-0 rounded border-border-strong accent-primary"
         />
-        <label htmlFor={inputId} className="text-sm leading-relaxed text-foreground">
-          {label}
-        </label>
-      </div>
+        <span className="text-sm leading-relaxed text-foreground">{label}</span>
+      </label>
       {hint && (
-        <p id={hintId} className="pl-6 text-xs leading-relaxed text-muted">
+        <p id={hintId} className="pl-8 text-xs leading-relaxed text-muted">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} role="alert" className="pl-6 text-xs font-medium text-urgency-referral">
+        <p id={errorId} role="alert" className="pl-8 text-xs font-medium text-urgency-referral">
           {error}
         </p>
       )}
@@ -339,7 +419,6 @@ export function CheckboxField({ label, checked, onChange, hint, error }: Checkbo
   )
 }
 
-/** Groups related questions under a small uppercase heading. */
 export function FieldGroup({
   title,
   description,
@@ -350,7 +429,7 @@ export function FieldGroup({
   children: ReactNode
 }) {
   return (
-    <fieldset className="flex flex-col gap-3 border-0 p-0">
+    <fieldset className="flex min-w-0 flex-col gap-3 border-0 p-0">
       <legend className="mb-1 flex flex-col gap-0.5 p-0">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted">{title}</span>
         {description && <span className="text-xs leading-relaxed text-subtle">{description}</span>}

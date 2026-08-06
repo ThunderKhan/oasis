@@ -1,7 +1,13 @@
 "use client"
 
 import { ShieldCheck } from "lucide-react"
-import { CheckboxField, FieldGroup, NumberField, SelectField, TextField } from "@/components/forms/fields"
+import {
+  CheckboxField,
+  FieldGroup,
+  NumberField,
+  RadioCardField,
+  TextField,
+} from "@/components/forms/fields"
 import type { PatientInput } from "@/lib/assessment-types"
 import type { FieldErrors } from "@/lib/validation"
 
@@ -27,10 +33,10 @@ export function PatientStep({ value, errors, onChange }: PatientStepProps) {
           label="Patient code"
           required
           value={value.patient_code}
-          onChange={(v) => onChange({ patient_code: v })}
+          onChange={(patientCode) => onChange({ patient_code: patientCode })}
           error={errors.patient_code}
-          placeholder="e.g. OASIS-014"
-          hint="Letters, numbers, and hyphens only."
+          placeholder="e.g. OASIS-2026-A4F2"
+          hint="A non-identifying code is generated for a blank assessment. You can replace it with your facility code."
           maxLength={64}
         />
       </FieldGroup>
@@ -40,24 +46,24 @@ export function PatientStep({ value, errors, onChange }: PatientStepProps) {
           label="Age (years)"
           required
           value={value.age === 0 ? null : value.age}
-          onChange={(v) => onChange({ age: v ?? 0 })}
+          onChange={(age) => onChange({ age: age ?? 0 })}
           error={errors.age}
           min={0}
           max={120}
         />
-        <SelectField
+        <RadioCardField
           label="Sex at birth"
           required
           value={value.sex_at_birth}
-          onChange={(v) => onChange({ sex_at_birth: v as PatientInput["sex_at_birth"] })}
+          onChange={(sexAtBirth) => onChange({ sex_at_birth: sexAtBirth })}
           error={errors.sex_at_birth}
+          hint="Determines which screening pathways apply."
           options={[
             { value: "female", label: "Female" },
             { value: "male", label: "Male" },
             { value: "intersex", label: "Intersex" },
             { value: "unknown", label: "Unknown / not recorded" },
           ]}
-          hint="Determines which screening pathways apply."
         />
       </FieldGroup>
 
@@ -65,7 +71,7 @@ export function PatientStep({ value, errors, onChange }: PatientStepProps) {
         <CheckboxField
           label="The patient has given verbal consent for this screening assessment."
           checked={value.consent_given}
-          onChange={(v) => onChange({ consent_given: v })}
+          onChange={(consentGiven) => onChange({ consent_given: consentGiven })}
           error={errors.consent_given}
           hint="Consent is required before any assessment data is recorded."
         />

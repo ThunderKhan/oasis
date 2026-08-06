@@ -2,20 +2,24 @@ import type { AssessmentInput } from "./assessment-types"
 
 /** Blank starting state for a new assessment. */
 
-function generatePatientCode(): string {
+/** Generate a non-identifying code in the browser after hydration. */
+export function generatePatientCode(): string {
   const year = new Date().getFullYear()
-  const random = Math.floor(1000 + Math.random() * 9000)
+  const values = new Uint8Array(2)
+  window.crypto.getRandomValues(values)
+  const suffix = Array.from(values, (value) => value.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase()
 
-  return `OASIS-${year}-${random}`
+  return `OASIS-${year}-${suffix}`
 }
-
 
 export function createInitialAssessment(): AssessmentInput {
   return {
     patient: {
-      patient_code: generatePatientCode(),
+      patient_code: "",
       age: 0,
-      sex_at_birth: "female",
+      sex_at_birth: "unknown",
       consent_given: false,
     },
     oral: {

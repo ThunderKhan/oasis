@@ -11,68 +11,120 @@ export interface StepDefinition {
 interface StepperProps {
   steps: StepDefinition[]
   currentIndex: number
-  /** Jump back to an earlier, already-visited step */
+  furthestIndex: number
   onStepSelect?: (index: number) => void
+  variant?: "vertical" | "compact"
+  interactionDisabled?: boolean
 }
 
-export function Stepper({ steps, currentIndex, onStepSelect }: StepperProps) {
+export function Stepper({
+  steps,
+  currentIndex,
+  furthestIndex,
+  onStepSelect,
+  variant = "compact",
+  interactionDisabled = false,
+}: StepperProps) {
+  if (variant === "vertical") {
+    return (
+      <nav aria-label="Assessment progress">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">Assessment progress</p>
+        <ol className="flex flex-col">
+          {steps.map((step, index) => {
+            const completed = index < furthestIndex
+            const current = index === currentIndex
+            const reachable = index <= furthestIndex
+            const available = reachable && !interactionDisabled
+
+            return (
+              <li key={step.id} className="relative flex min-h-14 items-start">
+                {index < steps.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "absolute left-[21px] top-10 h-6 w-px",
+                      index < furthestIndex ? "bg-primary" : "bg-border-strong",
+                    )}
+                  />
+                )}
+                <button
+                  type="button"
+                  disabled={!available}
+                  onClick={() => available && onStepSelect?.(index)}
+                  aria-current={current ? "step" : undefined}
+                  aria-label={`${step.label}${completed ? ", completed" : current ? ", current step" : reachable ? ", available" : ", not yet available"}`}
+                  className={cn(
+                    "flex min-h-11 w-full items-center gap-3 rounded-lg px-2 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                    current && "bg-primary-soft",
+                    available && !current && "hover:bg-primary-soft",
+                    !available && "cursor-not-allowed opacity-55",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
+                      completed && "border-primary bg-primary text-primary-foreground",
+                      current && "border-primary bg-background text-primary",
+                      !completed && !current && "border-border-strong bg-surface text-subtle",
+                    )}
+                  >
+                    {completed ? <Check aria-hidden="true" /> : index + 1}
+                  </span>
+                  <span className={cn("font-medium", current ? "text-foreground" : "text-muted")}>{step.label}</span>
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+      </nav>
+    )
+  }
+
   return (
-    <nav aria-label="Assessment progress">
-      <ol className="flex flex-wrap items-center gap-y-2">
+    <nav aria-label="Assessment progress" className="min-w-0">
+      <div className="mb-2 flex items-center justify-between gap-3 md:hidden">
+        <p className="text-sm font-semibold text-foreground">{steps[currentIndex]?.label}</p>
+        <p className="shrink-0 text-xs font-medium text-muted">
+          Step {currentIndex + 1} of {steps.length}
+        </p>
+      </div>
+      <ol className="grid grid-cols-5 gap-1">
         {steps.map((step, index) => {
-          const done = index < currentIndex
+          const completed = index < furthestIndex
           const current = index === currentIndex
-          const clickable = done && onStepSelect
+          const available = index <= furthestIndex
 
           return (
-            <li key={step.id} className="flex items-center">
+            <li key={step.id} className="min-w-0">
               <button
                 type="button"
-                disabled={!clickable}
-                onClick={() => clickable && onStepSelect(index)}
+                disabled={!available}
+                onClick={() => available && onStepSelect?.(index)}
                 aria-current={current ? "step" : undefined}
+                aria-label={`${step.label}${completed ? ", completed" : current ? ", current step" : ", not yet available"}`}
                 className={cn(
-                  "flex items-center gap-2 rounded-md px-2 py-1 text-sm transition-colors",
-                  clickable && "hover:bg-primary-soft",
-                  !clickable && "cursor-default",
+                  "flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-lg px-1 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:px-2",
+                  current && "bg-primary-soft text-primary",
+                  completed && !current && "text-muted hover:bg-primary-soft",
+                  !available && "cursor-not-allowed text-subtle opacity-55",
                 )}
               >
                 <span
                   className={cn(
-                    "flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                    done && "border-primary bg-primary text-primary-foreground",
-                    current && "border-primary bg-primary-soft text-primary",
-                    !done && !current && "border-border-strong bg-surface text-subtle",
+                    "flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
+                    completed && "border-primary bg-primary text-primary-foreground",
+                    current && "border-primary bg-background text-primary",
+                    !completed && !current && "border-border-strong bg-surface text-subtle",
                   )}
                 >
-                  {done ? <Check aria-hidden="true" className="size-3.5" /> : index + 1}
-                  {done && <span className="sr-only">completed</span>}
+                  {completed ? <Check aria-hidden="true" /> : index + 1}
                 </span>
-                <span
-                  className={cn(
-                    "hidden font-medium sm:inline",
-                    current ? "text-foreground" : done ? "text-muted" : "text-subtle",
-                  )}
-                >
-                  {step.label}
-                </span>
+                <span className="hidden truncate md:inline">{step.label}</span>
               </button>
-              {index < steps.length - 1 && (
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "mx-1 h-px w-4 sm:w-8",
-                    index < currentIndex ? "bg-primary" : "bg-border-strong",
-                  )}
-                />
-              )}
             </li>
           )
         })}
       </ol>
-      <p className="mt-2 text-xs text-muted sm:sr-only">
-        Step {currentIndex + 1} of {steps.length}: {steps[currentIndex]?.label}
-      </p>
     </nav>
   )
 }
