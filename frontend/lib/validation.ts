@@ -21,8 +21,8 @@ export const patientSchema = z
     age: z
       .number({ message: "Enter the patient's age in years." })
       .int("Age must be a whole number.")
-      .min(0, "Age cannot be negative.")
-      .max(120, "Enter an age of 120 or less."),
+      .min(18, "O.A.S.I.S. supports adults aged 18 and over.")
+      .max(110, "Enter an age of 110 or less."),
     sex_at_birth: z.enum(["female", "male", "intersex", "unknown"]),
     consent_given: z.boolean().refine((v) => v === true, {
       message: "Verbal consent must be confirmed before continuing.",

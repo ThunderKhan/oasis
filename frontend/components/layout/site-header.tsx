@@ -2,11 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
-import { Activity, Menu, X } from "lucide-react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
+import { MobileNavigation, type NavigationLink } from "@/components/layout/mobile-navigation"
+import { OasisLogo } from "@/components/layout/oasis-logo"
+import { PageContainer } from "@/components/layout/page-container"
 
-const NAV_LINKS = [
+const NAV_LINKS: NavigationLink[] = [
   { href: "/assessment", label: "New assessment" },
   { href: "/results", label: "Results" },
   { href: "/referrals", label: "Referrals" },
@@ -16,20 +18,46 @@ const NAV_LINKS = [
 
 export function SiteHeader() {
   const pathname = usePathname()
-  const [open, setOpen] = useState(false)
+  const landing = pathname === "/"
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    if (!landing) {
+      setScrolled(false)
+      return
+    }
+
+    const update = () => setScrolled(window.scrollY > 16)
+    update()
+    window.addEventListener("scroll", update, { passive: true })
+    return () => window.removeEventListener("scroll", update)
+  }, [landing])
+
+  const solid = !landing || scrolled
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Activity aria-hidden="true" className="size-4" />
+    <header
+      className={cn(
+        "sticky top-0 z-40 transition-[background-color,border-color,box-shadow] duration-250 motion-reduce:transition-none",
+        solid
+          ? "border-b border-border bg-surface/95 shadow-sm backdrop-blur-sm"
+          : "border-b border-transparent bg-background",
+      )}
+    >
+      <PageContainer className="flex h-16 items-center justify-between gap-4" variant="wide">
+        <Link
+          href="/"
+          aria-label="O.A.S.I.S. — Oncology Assessment and Screening Information System, home"
+          className="flex min-h-11 min-w-0 items-center gap-2.5 rounded-lg"
+        >
+          <OasisLogo className="size-8 text-primary" />
+          <span className="shrink-0 font-semibold tracking-tight">O.A.S.I.S.</span>
+          <span className="hidden truncate border-l border-border pl-3 text-sm text-muted xl:inline">
+            Oncology Assessment &amp; Screening Information System
           </span>
-          <span className="font-semibold tracking-tight">O.A.S.I.S.</span>
-          <span className="sr-only">Oncology Assessment and Screening Information System — home</span>
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => {
             const active = pathname === link.href
             return (
@@ -38,9 +66,9 @@ export function SiteHeader() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                  "flex min-h-11 items-center rounded-lg px-3 text-sm font-medium transition-colors",
                   active
-                    ? "bg-primary-soft text-primary"
+                    ? "bg-primary-soft text-primary underline decoration-2 underline-offset-4"
                     : "text-muted hover:bg-primary-soft hover:text-primary",
                 )}
               >
@@ -50,43 +78,8 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <button
-          type="button"
-          className="flex size-9 items-center justify-center rounded-md text-muted hover:bg-primary-soft hover:text-primary md:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X aria-hidden="true" className="size-5" /> : <Menu aria-hidden="true" className="size-5" />}
-          <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-        </button>
-      </div>
-
-      {open && (
-        <nav id="mobile-nav" aria-label="Main" className="border-t border-border bg-surface md:hidden">
-          <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3">
-            {NAV_LINKS.map((link) => {
-              const active = pathname === link.href
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={active ? "page" : undefined}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium",
-                    active
-                      ? "bg-primary-soft text-primary"
-                      : "text-muted hover:bg-primary-soft hover:text-primary",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              )
-            })}
-          </div>
-        </nav>
-      )}
+        <MobileNavigation links={NAV_LINKS} pathname={pathname} />
+      </PageContainer>
     </header>
   )
 }
