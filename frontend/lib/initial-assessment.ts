@@ -19,7 +19,7 @@ export function createInitialAssessment(): AssessmentInput {
     patient: {
       patient_code: "",
       age: 0,
-      sex_at_birth: "female",
+      sex_at_birth: "unknown",
       consent_given: false,
     },
     oral: {
