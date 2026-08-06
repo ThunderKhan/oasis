@@ -1,2 +1,77 @@
 @import "tailwindcss";
-:root{font-family:Inter,ui-sans-serif,system-ui;background:#f7faf9;color:#10231e} body{margin:0} input{accent-color:#0f766e}
+
+@theme {
+  /* Core palette — calm clinical confidence */
+  --color-background: #f7f8f7;
+  --color-surface: #ffffff;
+  --color-foreground: #1c2422;
+  --color-muted: #5b6b67;
+  --color-subtle: #8a9793;
+  --color-border: #e2e7e5;
+  --color-border-strong: #c9d2cf;
+
+  --color-primary: #0e5a54;
+  --color-primary-hover: #0b4a45;
+  --color-primary-soft: #e6f0ee;
+  --color-primary-foreground: #ffffff;
+
+  --color-emerald-muted: #3d7a68;
+  --color-clinical-blue: #3568a8;
+  --color-clinical-blue-soft: #ecf2f9;
+
+  /* Urgency palette — text / bg / border per category */
+  --color-urgency-routine: #52616b;
+  --color-urgency-routine-soft: #eef1f2;
+  --color-urgency-routine-border: #cdd5d9;
+
+  --color-urgency-screening: #2b5fa6;
+  --color-urgency-screening-soft: #eaf1fa;
+  --color-urgency-screening-border: #c4d6ee;
+
+  --color-urgency-priority: #96620a;
+  --color-urgency-priority-soft: #fbf2e0;
+  --color-urgency-priority-border: #ecd6a8;
+
+  --color-urgency-specialist: #b04e0d;
+  --color-urgency-specialist-soft: #fcefe4;
+  --color-urgency-specialist-border: #f0cfb2;
+
+  --color-urgency-followup: #bb3a13;
+  --color-urgency-followup-soft: #fcece6;
+  --color-urgency-followup-border: #f2c6b4;
+
+  --color-urgency-referral: #b01e2e;
+  --color-urgency-referral-soft: #fceaec;
+  --color-urgency-referral-border: #f0bcc2;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 0.75rem;
+}
+
+html {
+  background-color: var(--color-background);
+}
+
+body {
+  margin: 0;
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  accent-color: var(--color-primary);
+}

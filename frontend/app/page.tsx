@@ -1,7 +1,13 @@
-"use client";
-import {FormEvent,useState} from "react";
-const API=process.env.NEXT_PUBLIC_API_URL??"http://localhost:8000";
-const initial={patient:{patient_code:"DEMO-001",age:42,sex_at_birth:"female",consent_given:true},oral:{screened_before:true,years_since_screening:6,smokeless_tobacco_current:true,areca_nut_current:true,exposure_years:15,white_patch:true},breast:{applicable:true,screened_before:true,years_since_cbe:6},cervical:{applicable:true,screened_before:false,number_of_pregnancies:3}};
-export default function Home(){const [payload,setPayload]=useState(JSON.stringify(initial,null,2));const [result,setResult]=useState<any>(null);const [error,setError]=useState("");
-async function submit(e:FormEvent){e.preventDefault();setError("");try{const r=await fetch(`${API}/api/v1/assessments`,{method:"POST",headers:{"Content-Type":"application/json"},body:payload});const d=await r.json();if(!r.ok)throw new Error(JSON.stringify(d));setResult(d)}catch(x:any){setError(x.message)}}
-return <main className="min-h-screen p-6 md:p-12"><div className="mx-auto max-w-6xl"><header className="mb-8"><p className="font-semibold text-teal-700">O.A.S.I.S.</p><h1 className="text-4xl font-bold tracking-tight">Oncology Assessment & Screening Information System</h1><p className="mt-3 max-w-3xl text-slate-600">Explainable screening and referral prioritisation. This demonstration does not diagnose cancer.</p></header><div className="grid gap-6 lg:grid-cols-2"><form onSubmit={submit} className="rounded-2xl bg-white p-5 shadow-sm"><label className="mb-2 block font-semibold">Demo assessment JSON</label><textarea className="h-[560px] w-full rounded-xl border border-slate-300 p-3 font-mono text-xs" value={payload} onChange={e=>setPayload(e.target.value)}/><button className="mt-4 rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white">Run assessment</button>{error&&<pre className="mt-3 overflow-auto text-sm text-red-700">{error}</pre>}</form><section className="rounded-2xl bg-white p-5 shadow-sm"><h2 className="text-xl font-bold">Assessment result</h2>{!result?<p className="mt-4 text-slate-500">Run the seeded case to view prioritisation.</p>:<><div className="my-5 rounded-xl bg-teal-50 p-4"><span className="text-sm uppercase tracking-wide">Overall priority</span><div className="text-2xl font-bold">{result.overall_priority.replaceAll("_"," ")}</div></div><div className="space-y-4">{Object.values(result.results).map((r:any)=><article key={r.cancer_type} className="rounded-xl border p-4"><div className="flex justify-between"><h3 className="font-bold capitalize">{r.cancer_type}</h3><span className="font-semibold">{r.priority_score}/100</span></div><p className="mt-1 font-medium capitalize">{r.priority.replaceAll("_"," ")}</p><p className="mt-2 text-sm text-slate-600">{r.recommended_action}</p><ul className="mt-3 list-disc pl-5 text-sm">{r.reasons.map((q:any,i:number)=><li key={i}>{q.factor}: {q.effect}</li>)}</ul></article>)}</div></>}</section></div></div></main>}
+import { Hero } from "@/components/landing/hero"
+import { Pathways } from "@/components/landing/pathways"
+import { UrgencyLegend } from "@/components/landing/urgency-legend"
+
+export default function HomePage() {
+  return (
+    <>
+      <Hero />
+      <Pathways />
+      <UrgencyLegend />
+    </>
+  )
+}
