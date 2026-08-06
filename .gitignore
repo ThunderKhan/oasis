@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.local
+node_modules/
+.next/
+*.db
+backend/models/*.joblib
+backend/data/*.csv

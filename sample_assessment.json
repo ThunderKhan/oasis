@@ -1,0 +1,26 @@
+{
+  "patient": {
+    "patient_code": "DEMO-001",
+    "age": 42,
+    "sex_at_birth": "female",
+    "consent_given": true
+  },
+  "oral": {
+    "screened_before": true,
+    "years_since_screening": 6,
+    "smokeless_tobacco_current": true,
+    "areca_nut_current": true,
+    "exposure_years": 15,
+    "white_patch": true
+  },
+  "breast": {
+    "applicable": true,
+    "screened_before": true,
+    "years_since_cbe": 6
+  },
+  "cervical": {
+    "applicable": true,
+    "screened_before": false,
+    "number_of_pregnancies": 3
+  }
+}
