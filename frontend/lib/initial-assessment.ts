@@ -1,27 +1,25 @@
-import type { AssessmentInput } from "./assessment-types"
+import type { AssessmentPayload } from "./assessment-types"
 
-/** Blank starting state for a new assessment. */
+const PATIENT_CODE_SEQUENCE_KEY = "oasis.patient-code-sequence"
 
-/** Generate a non-identifying code in the browser after hydration. */
+/** Creates a session-scoped, non-identifying code such as OASIS-2026-001. */
 export function generatePatientCode(): string {
   const year = new Date().getFullYear()
-  const values = new Uint8Array(2)
-  window.crypto.getRandomValues(values)
-  const suffix = Array.from(values, (value) => value.toString(16).padStart(2, "0"))
-    .join("")
-    .toUpperCase()
+  let sequence = 1
 
-  return `OASIS-${year}-${suffix}`
+  if (typeof window !== "undefined") {
+    const previous = Number.parseInt(window.sessionStorage.getItem(PATIENT_CODE_SEQUENCE_KEY) ?? "0", 10)
+    sequence = Number.isFinite(previous) ? (previous % 999) + 1 : 1
+    window.sessionStorage.setItem(PATIENT_CODE_SEQUENCE_KEY, String(sequence))
+  }
+
+  return `OASIS-${year}-${String(sequence).padStart(3, "0")}`
 }
 
-export function createInitialAssessment(): AssessmentInput {
+/** Safe blank state. It contains no names, contact details, or other direct identifiers. */
+export function createInitialAssessment(): AssessmentPayload {
   return {
-    patient: {
-      patient_code: "",
-      age: 0,
-      sex_at_birth: "unknown",
-      consent_given: false,
-    },
+    patient: { patient_code: "", age: 0, sex_at_birth: "unknown", consent_given: false },
     oral: {
       screened_before: false,
       years_since_screening: null,

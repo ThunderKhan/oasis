@@ -1,9 +1,4 @@
-/**
- * Shared types mirroring the FastAPI backend contract.
- * Do not modify shapes without a matching backend change.
- */
-
-export type UrgencyCategory =
+export type Priority =
   | "routine"
   | "screening_due"
   | "priority_screening"
@@ -12,12 +7,7 @@ export type UrgencyCategory =
   | "prompt_referral"
 
 export type CancerType = "oral" | "breast" | "cervical"
-
-export type SexAtBirth =
-  | "female"
-  | "male"
-  | "intersex"
-  | "unknown"
+export type SexAtBirth = "female" | "male" | "intersex" | "unknown"
 
 export interface PatientInput {
   patient_code: string
@@ -88,25 +78,25 @@ export interface CervicalInput {
   std_diagnoses_count: number | null
 }
 
-export interface AssessmentInput {
+export interface AssessmentPayload {
   patient: PatientInput
   oral: OralInput
   breast: BreastInput
   cervical: CervicalInput
 }
 
-export interface ReasonEntry {
+export interface Reason {
   factor: string
   effect: string
-  evidence_key?: string | null
+  evidence_key: string | null
 }
 
-export interface PathwayResult {
+export interface CancerAssessment {
   cancer_type: CancerType
-  priority: UrgencyCategory
+  priority: Priority
   priority_score: number
   red_flags: string[]
-  reasons: ReasonEntry[]
+  reasons: Reason[]
   recommended_action: string
   screening_due: boolean
   experimental_model_probability: number | null
@@ -117,15 +107,15 @@ export interface PathwayResult {
 export interface AssessmentResponse {
   assessment_id: string
   patient_code: string
-  overall_priority: UrgencyCategory
-  results: Partial<Record<CancerType, PathwayResult>>
+  overall_priority: Priority
+  results: Record<string, CancerAssessment>
   disclaimer: string
 }
 
 export interface AssessmentSummary {
   assessment_id: string
   patient_code: string
-  overall_priority: UrgencyCategory
+  overall_priority: Priority
   created_at: string
 }
 
@@ -134,3 +124,8 @@ export interface HealthResponse {
   cervical_model_loaded: boolean
 }
 
+// Compatibility aliases retained for the existing questionnaire and results UI.
+export type AssessmentInput = AssessmentPayload
+export type UrgencyCategory = Priority
+export type ReasonEntry = Reason
+export type PathwayResult = CancerAssessment

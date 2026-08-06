@@ -7,30 +7,40 @@ import {
   Stethoscope,
   UserSearch,
 } from "lucide-react"
-import type { UrgencyCategory } from "./assessment-types"
+import type { Priority } from "./assessment-types"
 
 export interface PriorityConfig {
-  /** Machine key from the backend */
-  key: UrgencyCategory
-  /** Human label shown in UI */
+  key: Priority
   label: string
-  /** Short clinical description of what this category means */
   description: string
-  /** Icon reinforcing meaning without relying on colour alone */
   icon: LucideIcon
-  /** Sort weight — higher is more urgent */
-  weight: number
-  /** True for categories that must feel visually urgent */
-  urgent: boolean
-  /** Tailwind classes (theme tokens) */
+  textClasses: string
+  borderClasses: string
+  backgroundClasses: string
+  urgencyRank: number
+  // Compatibility fields used by the existing results components.
   textClass: string
-  bgClass: string
   borderClass: string
-  /** Solid variant for score bars / emphasis */
+  bgClass: string
   solidClass: string
+  weight: number
+  urgent: boolean
 }
 
-export const PRIORITY_ORDER: UrgencyCategory[] = [
+function priorityConfig(
+  config: Omit<PriorityConfig, "textClass" | "borderClass" | "bgClass" | "weight" | "urgent">,
+): PriorityConfig {
+  return {
+    ...config,
+    textClass: config.textClasses,
+    borderClass: config.borderClasses,
+    bgClass: config.backgroundClasses,
+    weight: config.urgencyRank,
+    urgent: config.urgencyRank >= 4,
+  }
+}
+
+export const PRIORITY_ORDER: Priority[] = [
   "routine",
   "screening_due",
   "priority_screening",
@@ -39,83 +49,77 @@ export const PRIORITY_ORDER: UrgencyCategory[] = [
   "prompt_referral",
 ]
 
-export const PRIORITY_CONFIG: Record<UrgencyCategory, PriorityConfig> = {
-  routine: {
+export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
+  routine: priorityConfig({
     key: "routine",
     label: "Routine",
     description: "No elevated indicators identified. Continue age-appropriate screening.",
     icon: CircleCheck,
-    weight: 1,
-    urgent: false,
-    textClass: "text-urgency-routine",
-    bgClass: "bg-urgency-routine-soft",
-    borderClass: "border-urgency-routine-border",
+    textClasses: "text-urgency-routine",
+    borderClasses: "border-urgency-routine-border",
+    backgroundClasses: "bg-urgency-routine-soft",
     solidClass: "bg-urgency-routine",
-  },
-  screening_due: {
+    urgencyRank: 1,
+  }),
+  screening_due: priorityConfig({
     key: "screening_due",
     label: "Screening due",
-    description: "Screening interval has lapsed. Schedule screening at the next opportunity.",
+    description: "The screening interval has lapsed. Schedule screening at the next opportunity.",
     icon: CalendarClock,
-    weight: 2,
-    urgent: false,
-    textClass: "text-urgency-screening",
-    bgClass: "bg-urgency-screening-soft",
-    borderClass: "border-urgency-screening-border",
+    textClasses: "text-urgency-screening",
+    borderClasses: "border-urgency-screening-border",
+    backgroundClasses: "bg-urgency-screening-soft",
     solidClass: "bg-urgency-screening",
-  },
-  priority_screening: {
+    urgencyRank: 2,
+  }),
+  priority_screening: priorityConfig({
     key: "priority_screening",
     label: "Priority screening",
     description: "Risk factors warrant earlier screening than the routine interval.",
     icon: AlertTriangle,
-    weight: 3,
-    urgent: false,
-    textClass: "text-urgency-priority",
-    bgClass: "bg-urgency-priority-soft",
-    borderClass: "border-urgency-priority-border",
+    textClasses: "text-urgency-priority",
+    borderClasses: "border-urgency-priority-border",
+    backgroundClasses: "bg-urgency-priority-soft",
     solidClass: "bg-urgency-priority",
-  },
-  specialist_risk_assessment: {
+    urgencyRank: 3,
+  }),
+  specialist_risk_assessment: priorityConfig({
     key: "specialist_risk_assessment",
     label: "Specialist risk assessment",
-    description: "Risk profile warrants structured assessment by a specialist service.",
+    description: "The risk profile warrants structured assessment by a specialist service.",
     icon: UserSearch,
-    weight: 4,
-    urgent: true,
-    textClass: "text-urgency-specialist",
-    bgClass: "bg-urgency-specialist-soft",
-    borderClass: "border-urgency-specialist-border",
+    textClasses: "text-urgency-specialist",
+    borderClasses: "border-urgency-specialist-border",
+    backgroundClasses: "bg-urgency-specialist-soft",
     solidClass: "bg-urgency-specialist",
-  },
-  clinical_follow_up: {
+    urgencyRank: 4,
+  }),
+  clinical_follow_up: priorityConfig({
     key: "clinical_follow_up",
     label: "Clinical follow-up",
-    description: "Findings require timely clinical review and follow-up.",
+    description: "Prior findings require timely clinical review and follow-up.",
     icon: Stethoscope,
-    weight: 5,
-    urgent: true,
-    textClass: "text-urgency-followup",
-    bgClass: "bg-urgency-followup-soft",
-    borderClass: "border-urgency-followup-border",
+    textClasses: "text-urgency-followup",
+    borderClasses: "border-urgency-followup-border",
+    backgroundClasses: "bg-urgency-followup-soft",
     solidClass: "bg-urgency-followup",
-  },
-  prompt_referral: {
+    urgencyRank: 5,
+  }),
+  prompt_referral: priorityConfig({
     key: "prompt_referral",
     label: "Prompt referral",
-    description: "Red-flag findings. Refer according to the local pathway without delay.",
+    description: "Red-flag findings require referral through the local pathway without delay.",
     icon: AlertOctagon,
-    weight: 6,
-    urgent: true,
-    textClass: "text-urgency-referral",
-    bgClass: "bg-urgency-referral-soft",
-    borderClass: "border-urgency-referral-border",
+    textClasses: "text-urgency-referral",
+    borderClasses: "border-urgency-referral-border",
+    backgroundClasses: "bg-urgency-referral-soft",
     solidClass: "bg-urgency-referral",
-  },
+    urgencyRank: 6,
+  }),
 }
 
-export function getPriorityConfig(priority: UrgencyCategory): PriorityConfig {
-  return PRIORITY_CONFIG[priority] ?? PRIORITY_CONFIG.routine
+export function getPriorityConfig(priority: Priority): PriorityConfig {
+  return PRIORITY_CONFIG[priority]
 }
 
 export const CANCER_TYPE_LABELS: Record<string, string> = {
@@ -124,7 +128,6 @@ export const CANCER_TYPE_LABELS: Record<string, string> = {
   cervical: "Cervical",
 }
 
-/** Mandatory clinical communication copy */
 export const SCORE_LABEL = "Screening Priority Index"
 export const SCORE_CAVEAT =
   "The Screening Priority Index reflects screening and referral urgency. It is not a probability of cancer, and a low index does not rule cancer out."
