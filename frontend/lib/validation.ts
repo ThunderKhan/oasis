@@ -41,7 +41,7 @@ export const oralSchema = z
     exposure_years: z
       .number({ message: "Enter total years of exposure (0 if none)." })
       .min(0, "Exposure years cannot be negative.")
-      .max(90, "Enter 90 years or less."),
+      .max(100, "Enter 100 years or less."),
     non_healing_ulcer: z.boolean(),
     white_patch: z.boolean(),
     red_patch: z.boolean(),

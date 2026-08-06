@@ -98,6 +98,7 @@ interface NumberFieldProps {
   max?: number
   step?: number
   emptyAsZero?: boolean
+  inputClassName?: string
 }
 
 export function NumberField({
@@ -111,6 +112,7 @@ export function NumberField({
   max,
   step = 1,
   emptyAsZero = false,
+  inputClassName,
 }: NumberFieldProps) {
   return (
     <FieldShell label={label} hint={hint} error={error} required={required}>
@@ -137,6 +139,7 @@ export function NumberField({
           className={cn(
             "min-h-11 w-full max-w-40 rounded-lg border bg-surface px-3 text-sm tabular-nums text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
             error ? "border-urgency-referral" : "border-border-strong",
+            inputClassName,
           )}
         />
       )}
