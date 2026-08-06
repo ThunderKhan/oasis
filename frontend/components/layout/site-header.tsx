@@ -9,10 +9,8 @@ import { OasisLogo } from "@/components/layout/oasis-logo"
 import { PageContainer } from "@/components/layout/page-container"
 
 const NAV_LINKS: NavigationLink[] = [
-  { href: "/assessment", label: "New assessment" },
-  { href: "/results", label: "Results" },
-  { href: "/referrals", label: "Referrals" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/referrals", label: "Referrals" },
   { href: "/about", label: "About" },
 ]
 
@@ -38,10 +36,10 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 transition-[background-color,border-color,box-shadow] duration-250 motion-reduce:transition-none",
+        "sticky top-0 z-40 transition-[background-color,border-color,box-shadow] duration-[250ms] motion-reduce:transition-none",
         solid
           ? "border-b border-border bg-surface/95 shadow-sm backdrop-blur-sm"
-          : "border-b border-transparent bg-background",
+          : "border-b border-transparent bg-transparent",
       )}
     >
       <PageContainer className="flex h-16 items-center justify-between gap-4" variant="wide">
@@ -57,7 +55,7 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-2 md:flex">
           {NAV_LINKS.map((link) => {
             const active = pathname === link.href
             return (
@@ -76,6 +74,13 @@ export function SiteHeader() {
               </Link>
             )
           })}
+          <Link
+            href="/assessment"
+            aria-current={pathname === "/assessment" ? "page" : undefined}
+            className="flex min-h-11 items-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
+          >
+            Start Assessment
+          </Link>
         </nav>
 
         <MobileNavigation links={NAV_LINKS} pathname={pathname} />
