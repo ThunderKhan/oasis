@@ -75,3 +75,20 @@ select,
 textarea {
   accent-color: var(--color-primary);
 }
+
+/* Referral print layout — hide chrome, keep clinical content */
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  header,
+  footer {
+    display: none !important;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+}

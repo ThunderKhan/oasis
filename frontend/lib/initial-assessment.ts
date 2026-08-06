@@ -1,10 +1,19 @@
 import type { AssessmentInput } from "./assessment-types"
 
 /** Blank starting state for a new assessment. */
+
+function generatePatientCode(): string {
+  const year = new Date().getFullYear()
+  const random = Math.floor(1000 + Math.random() * 9000)
+
+  return `OASIS-${year}-${random}`
+}
+
+
 export function createInitialAssessment(): AssessmentInput {
   return {
     patient: {
-      patient_code: "",
+      patient_code: generatePatientCode(),
       age: 0,
       sex_at_birth: "female",
       consent_given: false,
@@ -28,7 +37,7 @@ export function createInitialAssessment(): AssessmentInput {
       abnormal_exam: false,
     },
     breast: {
-      applicable: false,
+      applicable: true,
       screened_before: false,
       years_since_cbe: null,
       new_breast_lump: false,
@@ -46,7 +55,7 @@ export function createInitialAssessment(): AssessmentInput {
       relative_diagnosed_before_50: false,
     },
     cervical: {
-      applicable: false,
+      applicable: true,
       screened_before: false,
       years_since_screening: null,
       living_with_hiv: null,

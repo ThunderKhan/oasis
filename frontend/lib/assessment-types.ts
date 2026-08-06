@@ -130,6 +130,7 @@ export interface AssessmentSummary {
 }
 
 export interface HealthResponse {
-  status: "ok" | string
+  status: "ok"
   cervical_model_loaded: boolean
 }
+
