@@ -104,17 +104,11 @@ export interface CancerAssessment {
   limitations: string[]
 }
 
-export interface AssessmentResults {
-  oral: CancerAssessment
-  breast: CancerAssessment
-  cervical: CancerAssessment
-}
-
 export interface AssessmentResponse {
   assessment_id: string
   patient_code: string
   overall_priority: Priority
-  results: AssessmentResults
+  results: Record<string, CancerAssessment>
   disclaimer: string
 }
 

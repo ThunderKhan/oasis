@@ -84,7 +84,7 @@ const REASONS = [
 const RESEARCH = [
   { icon: ClipboardCheck, title: "Clinical decision support in oncology", body: "Structured support that keeps clinical judgement and local pathways at the centre." },
   { icon: ChartNoAxesCombined, title: "Machine-learning risk stratification", body: "Statistical signals can support prioritisation without overriding clinical warning signs." },
-  { icon: MessageSquareText, title: "Explainable probability models", body: "Outputs are paired with the specific findings that contributed to each recommendation." },
+  { icon: MessageSquareText, title: "Explainable decision support", body: "Outputs are paired with the specific findings that contributed to each recommendation." },
   { icon: Target, title: "Multimodal future extension", body: "A research direction for responsibly combining structured data with additional clinical inputs." },
 ]
 

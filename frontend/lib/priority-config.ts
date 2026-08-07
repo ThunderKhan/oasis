@@ -17,55 +17,12 @@ export interface PriorityConfig {
   textClasses: string
   borderClasses: string
   backgroundClasses: string
-  urgencyRank: number
-  // Compatibility fields used by the existing results components.
-  textClass: string
-  borderClass: string
-  bgClass: string
   solidClass: string
-  weight: number
-  urgent: boolean
-}
-
-function priorityConfig(
-  config: Omit<PriorityConfig, "textClass" | "borderClass" | "bgClass" | "weight" | "urgent">,
-): PriorityConfig {
-  return {
-    ...config,
-    textClass: config.textClasses,
-    borderClass: config.borderClasses,
-    bgClass: config.backgroundClasses,
-    weight: config.urgencyRank,
-    urgent: config.urgencyRank >= 4,
-  }
-}
-
-export const PRIORITY_ORDER: Priority[] = [
-  "routine",
-  "screening_due",
-  "priority_screening",
-  "specialist_risk_assessment",
-  "clinical_follow_up",
-  "prompt_referral",
-]
-
-export const ATTENTION_PRIORITIES: readonly Priority[] = [
-  "priority_screening",
-  "specialist_risk_assessment",
-  "clinical_follow_up",
-  "prompt_referral",
-]
-
-export function comparePriorityDescending(a: Priority, b: Priority) {
-  return PRIORITY_ORDER.indexOf(b) - PRIORITY_ORDER.indexOf(a)
-}
-
-export function requiresAttention(priority: Priority) {
-  return ATTENTION_PRIORITIES.includes(priority)
+  urgencyRank: number
 }
 
 export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
-  routine: priorityConfig({
+  routine: {
     key: "routine",
     label: "Routine",
     description: "No higher-urgency indicators were identified from the information entered. Continue programme-based screening and investigate new or persistent symptoms clinically.",
@@ -75,8 +32,8 @@ export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
     backgroundClasses: "bg-urgency-routine-soft",
     solidClass: "bg-urgency-routine",
     urgencyRank: 1,
-  }),
-  screening_due: priorityConfig({
+  },
+  screening_due: {
     key: "screening_due",
     label: "Screening due",
     description: "The screening interval has lapsed. Schedule screening at the next opportunity.",
@@ -86,8 +43,8 @@ export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
     backgroundClasses: "bg-urgency-screening-soft",
     solidClass: "bg-urgency-screening",
     urgencyRank: 2,
-  }),
-  priority_screening: priorityConfig({
+  },
+  priority_screening: {
     key: "priority_screening",
     label: "Priority screening",
     description: "Risk factors warrant earlier screening than the routine interval.",
@@ -97,8 +54,8 @@ export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
     backgroundClasses: "bg-urgency-priority-soft",
     solidClass: "bg-urgency-priority",
     urgencyRank: 3,
-  }),
-  specialist_risk_assessment: priorityConfig({
+  },
+  specialist_risk_assessment: {
     key: "specialist_risk_assessment",
     label: "Specialist risk assessment",
     description: "The risk profile warrants structured assessment by a specialist service.",
@@ -108,8 +65,8 @@ export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
     backgroundClasses: "bg-urgency-specialist-soft",
     solidClass: "bg-urgency-specialist",
     urgencyRank: 4,
-  }),
-  clinical_follow_up: priorityConfig({
+  },
+  clinical_follow_up: {
     key: "clinical_follow_up",
     label: "Clinical follow-up",
     description: "Prior findings require timely clinical review and follow-up.",
@@ -119,8 +76,8 @@ export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
     backgroundClasses: "bg-urgency-followup-soft",
     solidClass: "bg-urgency-followup",
     urgencyRank: 5,
-  }),
-  prompt_referral: priorityConfig({
+  },
+  prompt_referral: {
     key: "prompt_referral",
     label: "Prompt referral",
     description: "Red-flag findings require referral through the local pathway without delay.",
@@ -130,7 +87,27 @@ export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
     backgroundClasses: "bg-urgency-referral-soft",
     solidClass: "bg-urgency-referral",
     urgencyRank: 6,
-  }),
+  },
+}
+
+export const PRIORITY_ORDER: Priority[] = Object.values(PRIORITY_CONFIG)
+  .sort((a, b) => a.urgencyRank - b.urgencyRank)
+  .map(({ key }) => key)
+
+export const FOLLOW_UP_PRIORITIES: readonly Priority[] = [
+  "priority_screening",
+  "specialist_risk_assessment",
+  "clinical_follow_up",
+]
+
+export const REFERRAL_ATTENTION_PRIORITIES: readonly Priority[] = [
+  "specialist_risk_assessment",
+  "clinical_follow_up",
+  "prompt_referral",
+]
+
+export function comparePriorityDescending(a: Priority, b: Priority) {
+  return PRIORITY_CONFIG[b].urgencyRank - PRIORITY_CONFIG[a].urgencyRank
 }
 
 export function getPriorityConfig(priority: Priority): PriorityConfig {

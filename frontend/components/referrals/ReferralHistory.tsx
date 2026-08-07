@@ -8,17 +8,19 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PriorityBadge } from "@/components/results/PriorityBadge"
 import { getAssessments } from "@/lib/api"
-import { PRIORITY_ORDER, requiresAttention } from "@/lib/priority-config"
+import {
+  FOLLOW_UP_PRIORITIES,
+  PRIORITY_CONFIG,
+  PRIORITY_ORDER,
+} from "@/lib/priority-config"
 import type { AssessmentSummary, Priority } from "@/lib/assessment-types"
 
 const filterOptions: Array<{ value: "all" | Priority; label: string }> = [
   { value: "all", label: "All priorities" },
-  { value: "prompt_referral", label: "Prompt referral" },
-  { value: "clinical_follow_up", label: "Clinical follow-up" },
-  { value: "specialist_risk_assessment", label: "Specialist assessment" },
-  { value: "priority_screening", label: "Priority screening" },
-  { value: "screening_due", label: "Screening due" },
-  { value: "routine", label: "Routine" },
+  ...[...PRIORITY_ORDER].reverse().map((priority) => ({
+    value: priority,
+    label: PRIORITY_CONFIG[priority].label,
+  })),
 ]
 
 type SortKey = "created_at" | "assessment_id" | "patient_code" | "overall_priority"
@@ -47,7 +49,7 @@ export function ReferralHistory() {
     total: records.length,
     prompt: records.filter((record) => record.overall_priority === "prompt_referral").length,
     screening: records.filter((record) => record.overall_priority === "screening_due").length,
-    followup: records.filter((record) => requiresAttention(record.overall_priority)).length,
+    followup: records.filter((record) => FOLLOW_UP_PRIORITIES.includes(record.overall_priority)).length,
   }), [records])
 
   const visible = useMemo(() => {

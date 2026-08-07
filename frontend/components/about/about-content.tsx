@@ -31,16 +31,19 @@ import {
 
 const modules = [
   {
+    id: "oral-screening",
     title: "Oral cancer pathway",
     icon: FileSearch,
     text: "Structures oral-screening history, tobacco/areca/alcohol exposure, symptoms, and examination findings. Red-flag findings can raise referral urgency.",
   },
   {
+    id: "breast-screening",
     title: "Breast cancer pathway",
     icon: HeartPulse,
     text: "Structures clinical breast-screening history, current warning findings, and high-risk personal or family history to support screening, follow-up, or specialist-risk prioritisation.",
   },
   {
+    id: "cervical-screening",
     title: "Cervical cancer pathway",
     icon: Microscope,
     text: "Structures screening history, previous HPV/VIA/cytology information, HIV status, symptoms, and optional consented research variables. Experimental statistical support cannot lower rule-derived urgency.",
@@ -249,7 +252,7 @@ export function AboutContent() {
       </Reveal>
 
       <Reveal>
-        <section aria-labelledby="hybrid-heading">
+        <section id="referral-prioritisation" className="scroll-mt-24" aria-labelledby="hybrid-heading">
           <SectionTitle
             eyebrow="03 · Hybrid decision model"
             title="The highest-urgency signal determines the final recommendation"
@@ -300,8 +303,8 @@ export function AboutContent() {
             id="modules-heading"
           />
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
-            {modules.map(({ title, icon: Icon, text }) => (
-              <Card key={title}>
+            {modules.map(({ id, title, icon: Icon, text }) => (
+              <Card id={id} className="scroll-mt-24" key={title}>
                 <CardHeader>
                   <Icon aria-hidden="true" className="size-7 text-primary" />
                   <CardTitle>{title}</CardTitle>
@@ -332,7 +335,7 @@ export function AboutContent() {
       </Reveal>
 
       <Reveal>
-        <section aria-labelledby="research-heading">
+        <section id="evidence-basis" className="scroll-mt-24" aria-labelledby="research-heading">
           <SectionTitle
             eyebrow="06 · Research basis"
             title="Evidence informs the design; it does not validate this prototype"
@@ -348,7 +351,7 @@ export function AboutContent() {
       </Reveal>
 
       <Reveal>
-        <section aria-labelledby="limitations-heading">
+        <section id="model-limitations" className="scroll-mt-24" aria-labelledby="limitations-heading">
           <SectionTitle
             eyebrow="07 · Limitations"
             title="Known scientific, data, and deployment constraints"
@@ -398,7 +401,8 @@ export function AboutContent() {
 
       <Reveal>
         <aside
-          className="rounded-card border border-urgency-priority-border bg-urgency-priority-soft p-6"
+          id="clinical-disclaimer"
+          className="scroll-mt-24 rounded-card border border-urgency-priority-border bg-urgency-priority-soft p-6"
           aria-label="Clinical oversight note"
         >
           <div className="flex items-start gap-4">

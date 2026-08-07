@@ -24,14 +24,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { getAssessments } from "@/lib/api"
-import { PRIORITY_CONFIG, PRIORITY_ORDER } from "@/lib/priority-config"
+import {
+  PRIORITY_CONFIG,
+  PRIORITY_ORDER,
+  REFERRAL_ATTENTION_PRIORITIES,
+} from "@/lib/priority-config"
 import type { AssessmentSummary, Priority } from "@/lib/assessment-types"
-
-const ATTENTION_PRIORITIES: Priority[] = [
-  "prompt_referral",
-  "clinical_follow_up",
-  "specialist_risk_assessment",
-]
 
 function timestamp(value: string) {
   const parsed = new Date(value).valueOf()
@@ -208,7 +206,7 @@ function buildSummary(records: AssessmentSummary[]) {
     counts,
     recent,
     attention: recent.filter((record) =>
-      ATTENTION_PRIORITIES.includes(record.overall_priority),
+      REFERRAL_ATTENTION_PRIORITIES.includes(record.overall_priority),
     ),
   }
 }
@@ -319,12 +317,12 @@ function ScreeningWorkload({
 }) {
   const items = [
     {
-      label: "Screening due",
+      label: PRIORITY_CONFIG.screening_due.label,
       value: screeningDue,
       icon: CalendarDays,
     },
     {
-      label: "Priority screening",
+      label: PRIORITY_CONFIG.priority_screening.label,
       value: priorityScreening,
       icon: Clock3,
     },
