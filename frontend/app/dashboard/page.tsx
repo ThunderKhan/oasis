@@ -1,13 +1,16 @@
 import type { Metadata } from "next"
-import { PagePlaceholder } from "@/components/layout/page-placeholder"
+import { DashboardOverview } from "@/components/dashboard/dashboard-overview"
+import { PageContainer } from "@/components/layout/page-container"
 
-export const metadata: Metadata = { title: "Dashboard" }
+export const metadata: Metadata = {
+  title: "Operational Dashboard",
+  description: "Live assessment workload and referral-priority overview for O.A.S.I.S.",
+}
 
 export default function DashboardPage() {
   return (
-    <PagePlaceholder
-      title="Dashboard"
-      description="An overview of completed assessments and their urgency distribution will be shown here."
-    />
+    <PageContainer as="section" variant="wide" className="py-10 md:py-14">
+      <DashboardOverview />
+    </PageContainer>
   )
 }
