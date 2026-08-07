@@ -27,18 +27,8 @@ import {
 import { ValidationSummary } from "@/components/assessment/ValidationSummary"
 import { Card } from "@/components/ui/card"
 import { ApiError, createAssessment } from "@/lib/api"
-import type { AssessmentInput } from "@/lib/assessment-types"
-import { DEMO_SCENARIOS } from "@/lib/demo-scenarios"
-import { generatePatientCode } from "@/lib/initial-assessment"
-import {
-  clearSavedAssessment,
-  loadSavedInput,
-  loadSavedStep,
-  saveInput,
-  saveResult,
-  saveResultTimestamp,
-  saveStep,
-} from "@/lib/session-persistence"
+import type { AssessmentPayload } from "@/lib/assessment-types"
+import { getDemoScenario, type DemoScenario } from "@/lib/demo-scenarios"
 import { validateSection, type FieldErrors } from "@/lib/validation"
 import { useAssessmentStore } from "@/stores/assessment-store"
 
@@ -95,7 +85,7 @@ interface UtilityRailProps {
   activeDemoScenario: string | null
   submitting: boolean
   onReset: () => void
-  onLoadDemo: (id: string) => void
+  onLoadDemo: (id: DemoScenario["id"]) => void
 }
 
 function UtilityRail({
@@ -154,7 +144,7 @@ function UtilityRail({
   )
 }
 
-function SubmitConfirmation({ input }: { input: AssessmentInput }) {
+function SubmitConfirmation({ input }: { input: AssessmentPayload }) {
   const applicablePathways = [
     "Oral",
     input.breast.applicable && "Breast",
@@ -227,51 +217,36 @@ export function AssessmentWizard() {
   const router = useRouter()
   const reduceMotion = useReducedMotion()
   const {
-    input,
-    updateSection,
-    loadInput,
-    setResult,
+    assessment: input,
+    currentStep: stepIndex,
+    completedSteps,
+    activeDemoScenarioId,
     submitting,
-    setSubmitting,
     error,
+    hydrated,
+    updateSection,
+    setCurrentStep,
+    markStepCompleted,
+    setSubmitting,
     setError,
-    reset,
+    ensurePatientCode,
+    startFreshAssessment,
+    loadDemoScenario,
+    saveResult,
   } = useAssessmentStore()
 
-  const [stepIndex, setStepIndex] = useState(0)
-  const [furthestIndex, setFurthestIndex] = useState(0)
   const [errors, setErrors] = useState<FieldErrors>({})
-  const [hydrated, setHydrated] = useState(false)
   const [direction, setDirection] = useState(1)
-  const [activeDemoScenario, setActiveDemoScenario] = useState<string | null>(null)
   const [submissionMessageIndex, setSubmissionMessageIndex] = useState(0)
   const headingRef = useRef<HTMLHeadingElement>(null)
+  const furthestIndex = Math.max(0, ...completedSteps, stepIndex)
+  const activeDemoScenario = activeDemoScenarioId
+    ? getDemoScenario(activeDemoScenarioId)?.label.replace(/^Demo [A-C]: /, "") ?? null
+    : null
 
   useEffect(() => {
-    const savedInput = loadSavedInput()
-
-    if (savedInput) {
-      loadInput(savedInput)
-      const savedStep = loadSavedStep()
-
-      if (savedStep !== null && savedStep >= 0 && savedStep < STEPS.length) {
-        setStepIndex(savedStep)
-        setFurthestIndex(savedStep)
-      }
-    } else {
-      updateSection("patient", { patient_code: generatePatientCode() })
-    }
-
-    setHydrated(true)
-  }, [loadInput, updateSection])
-
-  useEffect(() => {
-    if (hydrated) saveInput(input)
-  }, [input, hydrated])
-
-  useEffect(() => {
-    if (hydrated) saveStep(stepIndex)
-  }, [stepIndex, hydrated])
+    if (hydrated) ensurePatientCode()
+  }, [ensurePatientCode, hydrated])
 
   useEffect(() => {
     if (!submitting) {
@@ -290,10 +265,10 @@ export function AssessmentWizard() {
 
   const goTo = useCallback((index: number, dir: number) => {
     setDirection(dir)
-    setStepIndex(index)
+    setCurrentStep(index)
     setErrors({})
     requestAnimationFrame(() => headingRef.current?.focus())
-  }, [])
+  }, [setCurrentStep])
 
   const currentStep = STEPS[stepIndex]
   const meta = STEP_META[currentStep.id]
@@ -319,7 +294,7 @@ export function AssessmentWizard() {
     setError(null)
 
     if (["patient", "oral", "breast", "cervical"].includes(currentStep.id)) {
-      const section = currentStep.id as keyof AssessmentInput
+      const section = currentStep.id as keyof AssessmentPayload
       const sectionErrors = validateSection(section, input[section])
 
       if (Object.keys(sectionErrors).length > 0) {
@@ -331,7 +306,7 @@ export function AssessmentWizard() {
     if (currentStep.id === "review" && !validateAllSections()) return
 
     const nextIndex = Math.min(stepIndex + 1, STEPS.length - 1)
-    setFurthestIndex((current) => Math.max(current, nextIndex))
+    markStepCompleted(nextIndex)
     goTo(nextIndex, 1)
   }
 
@@ -356,10 +331,7 @@ export function AssessmentWizard() {
 
     try {
       const result = await createAssessment(input)
-      setResult(result)
-      saveResult(result)
-      saveResultTimestamp(new Date().toISOString())
-      clearSavedAssessment()
+      saveResult(result, new Date().toISOString())
       router.push("/results")
     } catch (caughtError) {
       if (caughtError instanceof ApiError) {
@@ -375,24 +347,17 @@ export function AssessmentWizard() {
   }
 
   const handleReset = () => {
-    reset()
-    updateSection("patient", { patient_code: generatePatientCode() })
-    clearSavedAssessment()
-    setActiveDemoScenario(null)
-    setFurthestIndex(0)
+    startFreshAssessment()
     setErrors({})
-    goTo(0, -1)
+    setDirection(-1)
+    requestAnimationFrame(() => headingRef.current?.focus())
   }
 
-  const loadDemo = (id: string) => {
-    const scenario = DEMO_SCENARIOS.find((item) => item.id === id)
-    if (!scenario) return
-
-    loadInput(structuredClone(scenario.input))
-    setActiveDemoScenario(scenario.label.replace(/^Demo [A-C]: /, ""))
-    setFurthestIndex(0)
+  const loadDemo = (id: DemoScenario["id"]) => {
+    if (!loadDemoScenario(id)) return
     setErrors({})
-    goTo(0, -1)
+    setDirection(-1)
+    requestAnimationFrame(() => headingRef.current?.focus())
   }
 
   const actions = (mobile = false) => {
@@ -426,6 +391,15 @@ export function AssessmentWizard() {
       onLoadDemo={loadDemo}
     />
   )
+
+  if (!hydrated) {
+    return (
+      <div
+        className="skeleton-shimmer h-96 rounded-card border border-border bg-surface motion-reduce:bg-border"
+        aria-label="Restoring assessment progress"
+      />
+    )
+  }
 
   return (
     <div className="flex flex-col gap-5">

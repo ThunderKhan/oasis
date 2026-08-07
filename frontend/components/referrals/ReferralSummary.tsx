@@ -1,5 +1,5 @@
 import type { AssessmentPayload, AssessmentResponse, CancerAssessment } from "@/lib/assessment-types"
-import { CANCER_TYPE_LABELS, getPriorityConfig, PRIORITY_ORDER } from "@/lib/priority-config"
+import { CANCER_TYPE_LABELS, comparePriorityDescending, getPriorityConfig } from "@/lib/priority-config"
 
 function screeningHistory(input: AssessmentPayload, cancerType: CancerAssessment["cancer_type"]) {
   if (cancerType === "breast") {
@@ -23,7 +23,11 @@ export function ReferralSummary({
   input: AssessmentPayload
   completedAt?: string | null
 }) {
-  const pathways = Object.values(result.results).sort((a, b) => PRIORITY_ORDER.indexOf(b.priority) - PRIORITY_ORDER.indexOf(a.priority))
+  const pathways: CancerAssessment[] = [
+    result.results.oral,
+    result.results.breast,
+    result.results.cervical,
+  ].sort((a, b) => comparePriorityDescending(a.priority, b.priority))
   const completedDate = completedAt ? new Date(completedAt) : null
 
   return (

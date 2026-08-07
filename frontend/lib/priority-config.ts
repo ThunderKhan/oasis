@@ -49,6 +49,21 @@ export const PRIORITY_ORDER: Priority[] = [
   "prompt_referral",
 ]
 
+export const ATTENTION_PRIORITIES: readonly Priority[] = [
+  "priority_screening",
+  "specialist_risk_assessment",
+  "clinical_follow_up",
+  "prompt_referral",
+]
+
+export function comparePriorityDescending(a: Priority, b: Priority) {
+  return PRIORITY_ORDER.indexOf(b) - PRIORITY_ORDER.indexOf(a)
+}
+
+export function requiresAttention(priority: Priority) {
+  return ATTENTION_PRIORITIES.includes(priority)
+}
+
 export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
   routine: priorityConfig({
     key: "routine",

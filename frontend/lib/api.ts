@@ -1,12 +1,16 @@
 import type {
+  AssessmentHistoryResponse,
   AssessmentPayload,
   AssessmentResponse,
-  AssessmentSummary,
   HealthResponse,
 } from "./assessment-types"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/+$/, "")
 const DEFAULT_TIMEOUT_MS = 15_000
+const ENDPOINTS = {
+  assessments: "/api/v1/assessments",
+  health: "/health",
+} as const
 
 interface ValidationIssue {
   loc?: Array<string | number>
@@ -113,19 +117,17 @@ export function createAssessment(
   payload: AssessmentPayload,
   options?: RequestOptions,
 ): Promise<AssessmentResponse> {
-  return request<AssessmentResponse>("/api/v1/assessments", {
+  return request<AssessmentResponse>(ENDPOINTS.assessments, {
     ...options,
     method: "POST",
     body: JSON.stringify(payload),
   })
 }
 
-export function getAssessments(options?: RequestOptions): Promise<AssessmentSummary[]> {
-  return request<AssessmentSummary[]>("/api/v1/assessments", options)
+export function getAssessments(options?: RequestOptions): Promise<AssessmentHistoryResponse> {
+  return request<AssessmentHistoryResponse>(ENDPOINTS.assessments, options)
 }
 
-export const listAssessments = getAssessments
-
 export function getHealth(options?: RequestOptions): Promise<HealthResponse> {
-  return request<HealthResponse>("/health", options)
+  return request<HealthResponse>(ENDPOINTS.health, options)
 }

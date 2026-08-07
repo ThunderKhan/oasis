@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PriorityBadge } from "@/components/results/PriorityBadge"
 import { getAssessments } from "@/lib/api"
-import { getPriorityConfig } from "@/lib/priority-config"
+import { PRIORITY_ORDER, requiresAttention } from "@/lib/priority-config"
 import type { AssessmentSummary, Priority } from "@/lib/assessment-types"
 
 const filterOptions: Array<{ value: "all" | Priority; label: string }> = [
@@ -16,12 +16,18 @@ const filterOptions: Array<{ value: "all" | Priority; label: string }> = [
   { value: "prompt_referral", label: "Prompt referral" },
   { value: "clinical_follow_up", label: "Clinical follow-up" },
   { value: "specialist_risk_assessment", label: "Specialist assessment" },
+  { value: "priority_screening", label: "Priority screening" },
   { value: "screening_due", label: "Screening due" },
   { value: "routine", label: "Routine" },
 ]
 
 type SortKey = "created_at" | "assessment_id" | "patient_code" | "overall_priority"
 type SortDirection = "asc" | "desc"
+
+function safeTimestamp(value: string) {
+  const timestamp = new Date(value).valueOf()
+  return Number.isNaN(timestamp) ? 0 : timestamp
+}
 
 function formatDate(value: string) {
   const date = new Date(value)
@@ -41,7 +47,7 @@ export function ReferralHistory() {
     total: records.length,
     prompt: records.filter((record) => record.overall_priority === "prompt_referral").length,
     screening: records.filter((record) => record.overall_priority === "screening_due").length,
-    followup: records.filter((record) => ["clinical_follow_up", "specialist_risk_assessment", "priority_screening"].includes(record.overall_priority)).length,
+    followup: records.filter((record) => requiresAttention(record.overall_priority)).length,
   }), [records])
 
   const visible = useMemo(() => {
@@ -52,7 +58,11 @@ export function ReferralHistory() {
       .sort((a, b) => {
         const aValue = a[sortKey]
         const bValue = b[sortKey]
-        const comparison = sortKey === "created_at" ? new Date(aValue).valueOf() - new Date(bValue).valueOf() : aValue.localeCompare(bValue)
+        const comparison = sortKey === "created_at"
+          ? safeTimestamp(aValue) - safeTimestamp(bValue)
+          : sortKey === "overall_priority"
+            ? PRIORITY_ORDER.indexOf(aValue as Priority) - PRIORITY_ORDER.indexOf(bValue as Priority)
+            : aValue.localeCompare(bValue)
         return direction === "asc" ? comparison : -comparison
       })
   }, [records, priority, query, sortKey, direction])
@@ -134,8 +144,7 @@ export function ReferralHistory() {
                           </th>
                         )
                       })}
-                      <th className="border-b border-border px-4 py-3 font-semibold">Status</th>
-                      <th className="border-b border-border px-4 py-3 font-semibold">Action</th>
+
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">{visible.map((record) => <HistoryRow key={record.assessment_id} record={record} />)}</tbody>
@@ -151,10 +160,8 @@ export function ReferralHistory() {
 }
 
 function SummaryCard({ label, value }: { label: string; value: number }) { return <Card><CardHeader className="p-4 pb-0"><CardTitle className="text-xs font-medium text-muted">{label}</CardTitle></CardHeader><CardContent className="p-4 pt-2"><p className="text-2xl font-semibold tabular-nums">{value}</p></CardContent></Card> }
-function DisabledView() { return <button disabled aria-describedby="view-disabled-explanation" title="Detailed assessment retrieval will be enabled when the backend detail endpoint is added." className="min-h-11 rounded-lg border border-border px-3 text-sm font-medium text-muted opacity-60">View</button> }
-function HistoryRow({ record }: { record: AssessmentSummary }) { return <tr className="transition-colors duration-150 hover:bg-primary-soft/50 motion-reduce:transition-none"><td className="px-4 py-3 font-medium">{record.assessment_id}</td><td className="px-4 py-3">{record.patient_code}</td><td className="px-4 py-3"><PriorityBadge priority={record.overall_priority} size="sm" /></td><td className="px-4 py-3 text-muted">{formatDate(record.created_at)}</td><td className="px-4 py-3"><span className="rounded-full bg-urgency-routine-soft px-2 py-1 text-xs text-urgency-routine">Not tracked yet</span></td><td className="px-4 py-3"><DisabledView /></td></tr> }
-function HistoryCard({ record }: { record: AssessmentSummary }) { return <Card><CardHeader className="p-4 pb-0"><div className="flex flex-col items-start gap-3"><PriorityBadge priority={record.overall_priority} size="sm" /><div className="min-w-0"><CardTitle className="break-all text-sm">{record.assessment_id}</CardTitle><p className="mt-1 text-sm text-muted">Patient {record.patient_code}</p></div></div></CardHeader><CardContent className="flex flex-col items-start gap-3 p-4"><div className="text-sm leading-relaxed text-muted"><p>{formatDate(record.created_at)}</p><p className="mt-1">Status: Not tracked yet</p></div><DisabledView /></CardContent></Card> }
+function HistoryRow({ record }: { record: AssessmentSummary }) { return <tr className="transition-colors duration-150 hover:bg-primary-soft/50 motion-reduce:transition-none"><td className="px-4 py-3 font-medium">{record.assessment_id}</td><td className="px-4 py-3">{record.patient_code}</td><td className="px-4 py-3"><PriorityBadge priority={record.overall_priority} size="sm" /></td><td className="px-4 py-3 text-muted">{formatDate(record.created_at)}</td></tr> }
+function HistoryCard({ record }: { record: AssessmentSummary }) { return <Card><CardHeader className="p-4 pb-0"><div className="flex flex-col items-start gap-3"><PriorityBadge priority={record.overall_priority} size="sm" /><div className="min-w-0"><CardTitle className="break-all text-sm">{record.assessment_id}</CardTitle><p className="mt-1 text-sm text-muted">Patient {record.patient_code}</p></div></div></CardHeader><CardContent className="p-4 text-sm leading-relaxed text-muted"><p>{formatDate(record.created_at)}</p></CardContent></Card> }
 function EmptyState({ text }: { text: string }) { return <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-border-strong bg-surface px-6 py-14 text-center"><ClipboardList aria-hidden="true" className="size-8 text-primary" /><p className="font-medium">{text}</p></div> }
 function HistorySkeleton() { return <div className="flex flex-col gap-6" aria-label="Loading assessment history"><div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="skeleton-shimmer h-24 rounded-card border border-border motion-reduce:bg-border" />)}</div><div className="skeleton-shimmer h-16 rounded-card border border-border motion-reduce:bg-border" /><div className="skeleton-shimmer h-80 rounded-card border border-border motion-reduce:bg-border" /></div> }
 
-export const VIEW_DISABLED_EXPLANATION = "Detailed assessment retrieval will be enabled when the backend detail endpoint is added."

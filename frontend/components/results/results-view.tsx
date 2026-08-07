@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import { motion, useReducedMotion } from "framer-motion"
 import { Check, Clipboard, ClipboardList, Download, History, Printer, RotateCcw } from "lucide-react"
@@ -10,26 +10,11 @@ import { PriorityBadge } from "@/components/results/PriorityBadge"
 import { ResultDisclaimer } from "@/components/results/ResultDisclaimer"
 import { ReferralSummary } from "@/components/referrals/ReferralSummary"
 import { useAssessmentStore } from "@/stores/assessment-store"
-import {
-  loadSavedResult,
-  loadSavedResultTimestamp,
-  clearSavedResult,
-  clearSavedAssessment,
-} from "@/lib/session-persistence"
-import { getPriorityConfig, PRIORITY_ORDER, SCORE_CAVEAT } from "@/lib/priority-config"
-import type { AssessmentResponse, CancerAssessment } from "@/lib/assessment-types"
+import { comparePriorityDescending, getPriorityConfig, SCORE_CAVEAT } from "@/lib/priority-config"
+import type { AssessmentResponse } from "@/lib/assessment-types"
 
 export function ResultsView() {
-  const { result, setResult, reset } = useAssessmentStore()
-  const [hydrated, setHydrated] = useState(false)
-
-  useEffect(() => {
-    if (!result) {
-      const saved = loadSavedResult()
-      if (saved) setResult(saved)
-    }
-    setHydrated(true)
-  }, [result, setResult])
+  const { result, hydrated, startFreshAssessment } = useAssessmentStore()
 
   if (!hydrated) return <div className="skeleton-shimmer h-64 rounded-card border border-border bg-surface motion-reduce:bg-border" aria-label="Loading assessment results" />
 
@@ -44,21 +29,21 @@ export function ResultsView() {
     )
   }
 
-  return <ResultsContent result={result} onNewAssessment={() => { reset(); clearSavedResult(); clearSavedAssessment() }} />
+  return <ResultsContent result={result} onNewAssessment={startFreshAssessment} />
 }
 
 function ResultsContent({ result, onNewAssessment }: { result: AssessmentResponse; onNewAssessment: () => void }) {
-  const assessment = useAssessmentStore((state) => state.assessment)
+  const { assessment, resultTimestamp } = useAssessmentStore()
   const reduceMotion = useReducedMotion()
   const [copied, setCopied] = useState(false)
-  const [completedAt, setCompletedAt] = useState<string | null>(null)
   const overall = getPriorityConfig(result.overall_priority)
-  const pathways = useMemo(() => Object.values(result.results).filter((item): item is CancerAssessment => Boolean(item)).sort((a, b) => PRIORITY_ORDER.indexOf(b.priority) - PRIORITY_ORDER.indexOf(a.priority)), [result.results])
-  useEffect(() => {
-    setCompletedAt(loadSavedResultTimestamp())
-  }, [result.assessment_id])
-
-  const completed = completedAt ? new Date(completedAt) : null
+  const pathways = useMemo(
+    () => [result.results.oral, result.results.breast, result.results.cervical].sort(
+      (a, b) => comparePriorityDescending(a.priority, b.priority),
+    ),
+    [result.results],
+  )
+  const completed = resultTimestamp ? new Date(resultTimestamp) : null
 
   async function copyAssessmentId() {
     try {
@@ -124,7 +109,7 @@ function ResultsContent({ result, onNewAssessment }: { result: AssessmentRespons
         </div>
       </div>
 
-      <ReferralSummary result={result} input={assessment} completedAt={completedAt} />
+      <ReferralSummary result={result} input={assessment} completedAt={resultTimestamp} />
     </>
   )
 }
