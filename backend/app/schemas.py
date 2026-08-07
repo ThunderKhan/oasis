@@ -23,7 +23,7 @@ class Patient(BaseModel):
     patient_code: str = Field(min_length=1, max_length=64)
     age: int = Field(ge=0, le=120)
     sex_at_birth: Literal["female", "male", "intersex", "unknown"]
-    consent_given: bool = True
+    consent_given: bool
 
 class OralInput(BaseModel):
     screened_before: bool = False
@@ -74,7 +74,6 @@ class CervicalInput(BaseModel):
     persistent_foul_discharge: bool = False
     pelvic_pain: bool = False
     abnormal_cervical_exam: bool = False
-    # Optional research-dataset-style variables for the experimental model
     number_of_sexual_partners: float | None = Field(default=None, ge=0, le=100)
     first_sexual_intercourse_age: float | None = Field(default=None, ge=0, le=100)
     number_of_pregnancies: float | None = Field(default=None, ge=0, le=30)
@@ -112,7 +111,7 @@ class CancerAssessment(BaseModel):
     screening_due: bool
     experimental_model_probability: float | None = Field(default=None, ge=0, le=1)
     model_version: str
-    limitations: list[str] = []
+    limitations: list[str] = Field(default_factory=list)
 
 class AssessmentResponse(BaseModel):
     assessment_id: str

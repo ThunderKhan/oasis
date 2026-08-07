@@ -1,7 +1,4 @@
-from .schemas import (
-    Patient, OralInput, BreastInput, CervicalInput, CancerAssessment,
-    Priority, Reason
-)
+from .schemas import BreastInput, CancerAssessment, CervicalInput, OralInput, Patient, Priority, Reason
 
 SCORE_BY_PRIORITY = {
     Priority.ROUTINE: 15,
@@ -12,26 +9,25 @@ SCORE_BY_PRIORITY = {
     Priority.PROMPT_REFERRAL: 95,
 }
 
-def _due(age: int, applicable: bool, screened_before: bool, years: float | None,
-         start_age: int = 30, interval: int = 5) -> bool:
+def _due(age:int, applicable:bool, screened_before:bool, years:float|None, start_age:int=30, interval:int=5)->bool:
     if not applicable or age < start_age:
         return False
     return (not screened_before) or years is None or years >= interval
 
-def assess_oral(patient: Patient, x: OralInput) -> CancerAssessment:
-    red=[]; reasons=[]
-    red_map = {
-        "Persistent/non-healing oral ulcer": x.non_healing_ulcer,
-        "Persistent white oral patch": x.white_patch,
-        "Persistent red oral patch": x.red_patch,
-        "Oral growth or lump": x.oral_growth,
-        "Unexplained oral bleeding": x.unexplained_bleeding,
-        "Restricted mouth opening": x.restricted_mouth_opening,
-        "Difficulty swallowing": x.difficulty_swallowing,
-        "Neck lump": x.neck_lump,
-        "Abnormal oral examination": x.abnormal_exam,
+def assess_oral(patient:Patient, x:OralInput)->CancerAssessment:
+    red_map={
+        "Persistent/non-healing oral ulcer":x.non_healing_ulcer,
+        "Persistent white oral patch":x.white_patch,
+        "Persistent red oral patch":x.red_patch,
+        "Oral growth or lump":x.oral_growth,
+        "Unexplained oral bleeding":x.unexplained_bleeding,
+        "Restricted mouth opening":x.restricted_mouth_opening,
+        "Difficulty swallowing":x.difficulty_swallowing,
+        "Neck lump":x.neck_lump,
+        "Abnormal oral examination":x.abnormal_exam,
     }
     red=[k for k,v in red_map.items() if v]
+    reasons=[]
     points=0
     exposures=[
         (x.smokeless_tobacco_current,3,"Current smokeless-tobacco exposure","ORAL_TOBACCO"),
@@ -58,7 +54,8 @@ def assess_oral(patient: Patient, x: OralInput) -> CancerAssessment:
     elif due:
         priority=Priority.SCREENING_DUE
         reasons.append(Reason(factor="Population-screening interval",effect="Oral screening is due under configured programme rules",evidence_key="INDIA_PBS_30"))
-    else: priority=Priority.ROUTINE
+    else:
+        priority=Priority.ROUTINE
     action={
         Priority.PROMPT_REFERRAL:"Prompt clinical oral examination and referral according to local pathway.",
         Priority.PRIORITY_SCREENING:"Prioritise visual oral examination by a trained provider.",
@@ -67,13 +64,28 @@ def assess_oral(patient: Patient, x: OralInput) -> CancerAssessment:
     }[priority]
     return CancerAssessment(cancer_type="oral",priority=priority,priority_score=SCORE_BY_PRIORITY[priority],red_flags=red,reasons=reasons,recommended_action=action,screening_due=due,model_version="oral-hybrid-rules-v1.0",limitations=["Priority index is not cancer probability","Rules require local clinician/programme review"])
 
-def assess_breast(patient: Patient, x: BreastInput) -> CancerAssessment:
+def assess_breast(patient:Patient, x:BreastInput)->CancerAssessment:
     applicable=x.applicable and patient.sex_at_birth in {"female","intersex","unknown"}
+    if not applicable:
+        return CancerAssessment(
+            cancer_type="breast",
+            priority=Priority.ROUTINE,
+            priority_score=SCORE_BY_PRIORITY[Priority.ROUTINE],
+            red_flags=[],
+            reasons=[Reason(factor="Breast screening pathway not included",effect="No breast screening priority was calculated from this pathway",evidence_key=None)],
+            recommended_action="No breast screening action generated from this pathway; investigate any clinical symptoms according to local practice.",
+            screening_due=False,
+            model_version="breast-hybrid-rules-v1.0",
+            limitations=["Inapplicable pathways ignore stored screening and risk-field values","This does not exclude clinically important breast symptoms"],
+        )
     red_map={
-        "New breast lump":x.new_breast_lump,"Axillary lump":x.axillary_lump,
-        "Bloody nipple discharge":x.bloody_nipple_discharge,"New nipple inversion":x.new_nipple_inversion,
+        "New breast lump":x.new_breast_lump,
+        "Axillary lump":x.axillary_lump,
+        "Bloody nipple discharge":x.bloody_nipple_discharge,
+        "New nipple inversion":x.new_nipple_inversion,
         "Skin dimpling or peau d'orange":x.skin_dimpling_or_peau_dorange,
-        "Breast ulceration":x.breast_ulceration,"Abnormal clinical breast examination":x.abnormal_cbe,
+        "Breast ulceration":x.breast_ulceration,
+        "Abnormal clinical breast examination":x.abnormal_cbe,
     }
     red=[k for k,v in red_map.items() if v]
     reasons=[]
@@ -88,7 +100,8 @@ def assess_breast(patient: Patient, x: BreastInput) -> CancerAssessment:
     elif due:
         priority=Priority.SCREENING_DUE
         reasons.append(Reason(factor="Population-screening interval",effect="Clinical breast examination is due under configured programme rules",evidence_key="INDIA_PBS_30"))
-    else: priority=Priority.ROUTINE
+    else:
+        priority=Priority.ROUTINE
     action={
         Priority.PROMPT_REFERRAL:"Prompt clinical evaluation through the breast referral pathway.",
         Priority.SPECIALIST_ASSESSMENT:"Refer for specialist hereditary/high-risk assessment.",
@@ -97,9 +110,29 @@ def assess_breast(patient: Patient, x: BreastInput) -> CancerAssessment:
     }[priority]
     return CancerAssessment(cancer_type="breast",priority=priority,priority_score=SCORE_BY_PRIORITY[priority],red_flags=red,reasons=reasons,recommended_action=action,screening_due=due,model_version="breast-hybrid-rules-v1.0",limitations=["Not a Gail/BCRAT probability estimate","No mammography image model is used"])
 
-def assess_cervical(patient: Patient, x: CervicalInput, probability: float|None=None, threshold: float=0.20) -> CancerAssessment:
+def assess_cervical(patient:Patient, x:CervicalInput, probability:float|None=None, threshold:float=0.20)->CancerAssessment:
     applicable=x.applicable and patient.sex_at_birth in {"female","intersex","unknown"}
-    red_map={"Postcoital bleeding":x.postcoital_bleeding,"Postmenopausal bleeding":x.postmenopausal_bleeding,"Unexplained persistent bleeding":x.unexplained_persistent_bleeding,"Persistent foul discharge":x.persistent_foul_discharge,"Pelvic pain":x.pelvic_pain,"Abnormal cervical examination":x.abnormal_cervical_exam}
+    if not applicable:
+        return CancerAssessment(
+            cancer_type="cervical",
+            priority=Priority.ROUTINE,
+            priority_score=SCORE_BY_PRIORITY[Priority.ROUTINE],
+            red_flags=[],
+            reasons=[Reason(factor="Cervical screening pathway not included",effect="No cervical screening priority or experimental model output was used",evidence_key=None)],
+            recommended_action="No cervical screening action generated from this pathway.",
+            screening_due=False,
+            experimental_model_probability=None,
+            model_version="cervical-hybrid-v1.0",
+            limitations=["Inapplicable pathways ignore stored screening and research-model values"],
+        )
+    red_map={
+        "Postcoital bleeding":x.postcoital_bleeding,
+        "Postmenopausal bleeding":x.postmenopausal_bleeding,
+        "Unexplained persistent bleeding":x.unexplained_persistent_bleeding,
+        "Persistent foul discharge":x.persistent_foul_discharge,
+        "Pelvic pain":x.pelvic_pain,
+        "Abnormal cervical examination":x.abnormal_cervical_exam,
+    }
     red=[k for k,v in red_map.items() if v]
     reasons=[]
     start=25 if x.living_with_hiv else 30
@@ -111,13 +144,14 @@ def assess_cervical(patient: Patient, x: CervicalInput, probability: float|None=
     elif x.previous_positive_hpv or x.previous_abnormal_via_or_cytology:
         priority=Priority.CLINICAL_FOLLOW_UP
         reasons.append(Reason(factor="Previous abnormal cervical screening result",effect="Requires follow-up under the local screening algorithm",evidence_key="CERVICAL_ABNORMAL_PRIOR"))
-    elif due:
-        priority=Priority.SCREENING_DUE
-        reasons.append(Reason(factor="Configured age/interval eligibility",effect="Cervical screening is due",evidence_key="WHO_CERVICAL_SCREENING"))
-    elif probability is not None and probability >= threshold:
-        priority=Priority.PRIORITY_SCREENING
-        reasons.append(Reason(factor="Experimental history-model output",effect="Raises priority; does not diagnose cancer",evidence_key="CERVICAL_ML"))
-    else: priority=Priority.ROUTINE
+    else:
+        rule_priority=Priority.SCREENING_DUE if due else Priority.ROUTINE
+        model_priority=Priority.PRIORITY_SCREENING if probability is not None and probability >= threshold else Priority.ROUTINE
+        priority=max((rule_priority,model_priority),key=lambda p:SCORE_BY_PRIORITY[p])
+        if due:
+            reasons.append(Reason(factor="Configured age/interval eligibility",effect="Cervical screening is due",evidence_key="WHO_CERVICAL_SCREENING"))
+        if model_priority==Priority.PRIORITY_SCREENING:
+            reasons.append(Reason(factor="Experimental history-model output",effect="Raises priority; does not diagnose cancer",evidence_key="CERVICAL_ML"))
     action={
         Priority.PROMPT_REFERRAL:"Prompt clinical evaluation; do not delay because of a model score.",
         Priority.CLINICAL_FOLLOW_UP:"Route to the configured follow-up/triage pathway.",
