@@ -31,7 +31,7 @@ function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; 
       initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: reduceMotion ? 0 : 0.55, delay: reduceMotion ? 0 : delay, ease: EASE }}
+      transition={{ duration: reduceMotion ? 0 : 0.35, delay: reduceMotion ? 0 : delay, ease: EASE }}
     >
       {children}
     </motion.div>
@@ -122,8 +122,12 @@ export function LandingSections() {
             {WORKFLOW.map((step, index) => (
               <Reveal key={step} delay={index * 0.07} className="relative flex gap-4 pb-8 last:pb-0 md:block md:pb-0">
                 {index < WORKFLOW.length - 1 ? (
-                  <div
-                    className="absolute bottom-0 left-4 top-8 w-px bg-border-strong md:bottom-auto md:left-1/2 md:right-0 md:top-4 md:h-px md:w-full"
+                  <motion.div
+                    className="absolute bottom-0 left-4 top-8 w-px origin-top bg-border-strong md:bottom-auto md:left-1/2 md:right-0 md:top-4 md:h-px md:w-full md:origin-left"
+                    initial={reduceMotion ? false : { scaleY: 0, scaleX: 0 }}
+                    whileInView={{ scaleY: 1, scaleX: 1 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: reduceMotion ? 0 : 0.3, delay: reduceMotion ? 0 : index * 0.05 }}
                     aria-hidden="true"
                   />
                 ) : null}
@@ -143,8 +147,8 @@ export function LandingSections() {
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
             {CANCER_PATHWAYS.map((pathway, index) => (
               <Reveal key={pathway.title} delay={index * 0.08}>
-                <article className="group flex min-h-full flex-col rounded-card border border-border-strong bg-background p-7 transition-[transform,border-color] duration-300 hover:-translate-y-1 hover:border-primary">
-                  <span className="flex size-12 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform duration-300 group-hover:scale-105"><pathway.icon aria-hidden="true" /></span>
+                <article className="flex min-h-full flex-col rounded-card border border-border-strong bg-background p-7 transition-colors duration-200 hover:border-primary motion-reduce:transition-none">
+                  <span className="flex size-12 items-center justify-center rounded-lg bg-primary text-primary-foreground"><pathway.icon aria-hidden="true" /></span>
                   <h3 className="mt-7 text-2xl font-semibold tracking-tight text-foreground">{pathway.title}</h3>
                   <ul className="mt-6 flex flex-col gap-3">
                     {pathway.points.map((point) => (

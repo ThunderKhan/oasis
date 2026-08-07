@@ -431,7 +431,7 @@ function Reveal({ children }: { children: ReactNode }) {
       initial={reduceMotion ? false : { opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: reduceMotion ? 0 : 0.45 }}
+      transition={{ duration: reduceMotion ? 0 : 0.35, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>

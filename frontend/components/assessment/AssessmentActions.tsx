@@ -14,7 +14,7 @@ interface AssessmentActionsProps {
 
 export function AssessmentActions({ backDisabled, submitting, primaryLabel, submit = false, mobile = false, onBack, onPrimary }: AssessmentActionsProps) {
   return (
-    <div className={cn("flex items-center gap-3", mobile ? "w-full" : "justify-between")}>
+    <div className={cn("flex min-w-0 items-center gap-3", mobile ? "w-full" : "justify-between")}>
       <Button type="button" variant="outline" size={mobile ? "lg" : "md"} onClick={onBack} disabled={backDisabled || submitting} className={mobile ? "flex-1" : undefined}>
         <ArrowLeft data-icon="inline-start" aria-hidden="true" />
         Back

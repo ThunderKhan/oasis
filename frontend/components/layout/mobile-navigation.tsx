@@ -40,6 +40,12 @@ export function MobileNavigation({ links, pathname }: MobileNavigationProps) {
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
+    const backgroundNodes = Array.from(document.body.children).filter(
+      (node): node is HTMLElement => node instanceof HTMLElement && !node.contains(panelRef.current),
+    )
+    backgroundNodes.forEach((node) => {
+      node.inert = true
+    })
 
     const focusables = () => Array.from(panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])
     const frame = window.requestAnimationFrame(() => focusables()[0]?.focus())
@@ -70,6 +76,9 @@ export function MobileNavigation({ links, pathname }: MobileNavigationProps) {
     return () => {
       window.cancelAnimationFrame(frame)
       document.body.style.overflow = previousOverflow
+      backgroundNodes.forEach((node) => {
+        node.inert = false
+      })
       document.removeEventListener("keydown", handleKeyDown)
       triggerRef.current?.focus()
     }

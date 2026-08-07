@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
+import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { MobileNavigation, type NavigationLink } from "@/components/layout/mobile-navigation"
 import { OasisLogo } from "@/components/layout/oasis-logo"
@@ -16,6 +17,7 @@ const NAV_LINKS: NavigationLink[] = [
 
 export function SiteHeader() {
   const pathname = usePathname()
+  const reduceMotion = useReducedMotion()
   const landing = pathname === "/"
   const [scrolled, setScrolled] = useState(false)
 
@@ -64,13 +66,21 @@ export function SiteHeader() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-11 items-center rounded-lg px-3 text-sm font-medium transition-colors",
+                  "relative flex min-h-11 items-center rounded-lg px-3 text-sm font-medium transition-colors",
                   active
-                    ? "bg-primary-soft text-primary underline decoration-2 underline-offset-4"
+                    ? "bg-primary-soft text-primary"
                     : "text-muted hover:bg-primary-soft hover:text-primary",
                 )}
               >
                 {link.label}
+                {active ? (
+                  <motion.span
+                    layoutId={reduceMotion ? undefined : "primary-navigation-indicator"}
+                    className="absolute inset-x-3 bottom-1.5 h-0.5 rounded-full bg-primary"
+                    transition={{ duration: reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    aria-hidden="true"
+                  />
+                ) : null}
               </Link>
             )
           })}

@@ -281,9 +281,9 @@ function PriorityDistribution({
             return (
               <div
                 key={priority}
-                className="grid grid-cols-[minmax(8rem,0.9fr)_minmax(7rem,1.7fr)_2rem] items-center gap-3"
+                className="grid grid-cols-[minmax(0,1fr)_2rem] items-center gap-2 sm:grid-cols-[minmax(8rem,0.9fr)_minmax(7rem,1.7fr)_2rem] sm:gap-3"
               >
-                <span className="text-sm text-muted">{config.label}</span>
+                <span className="col-span-2 text-sm text-muted sm:col-span-1">{config.label}</span>
                 <div
                   className="h-2.5 overflow-hidden rounded-full bg-background"
                   aria-hidden="true"
@@ -293,8 +293,8 @@ function PriorityDistribution({
                     initial={reduceMotion ? false : { width: 0 }}
                     animate={{ width: `${(count / max) * 100}%` }}
                     transition={{
-                      duration: reduceMotion ? 0 : 0.55,
-                      ease: "easeOut",
+                      duration: reduceMotion ? 0 : 0.4,
+                      ease: [0.22, 1, 0.36, 1],
                     }}
                   />
                 </div>
@@ -429,7 +429,7 @@ function EmptyDashboard() {
       <CardContent className="flex justify-center pb-12">
         <Link
           href="/assessment"
-          className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary-hover"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
         >
           Start the first assessment
         </Link>
@@ -457,13 +457,13 @@ function DashboardLoading() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <Card key={index}>
-            <CardContent className="h-28 animate-pulse" />
+            <CardContent className="skeleton-shimmer h-28 motion-reduce:bg-border" />
           </Card>
         ))}
       </div>
 
       <Card>
-        <CardContent className="h-72 animate-pulse" />
+        <CardContent className="skeleton-shimmer h-72 motion-reduce:bg-border" />
       </Card>
     </div>
   )

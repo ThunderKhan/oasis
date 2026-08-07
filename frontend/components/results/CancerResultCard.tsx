@@ -25,9 +25,9 @@ export function CancerResultCard({ result, index = 0 }: { result: CancerAssessme
     >
       <Card className={cn("overflow-hidden border", config.borderClasses)}>
         <CardHeader className="border-b border-border pb-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <CardTitle className="text-lg">{label} cancer pathway</CardTitle>
+          <div className="flex flex-col items-start gap-3 sm:flex-row-reverse sm:items-center sm:justify-between">
             <PriorityBadge priority={result.priority} />
+            <CardTitle className="text-lg">{label} cancer pathway</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
@@ -46,9 +46,9 @@ export function CancerResultCard({ result, index = 0 }: { result: CancerAssessme
 
           <RecommendedAction action={result.recommended_action} priority={result.priority} screeningDue={result.screening_due} />
 
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3 text-sm">
+          <div className="flex flex-col gap-1 rounded-lg border border-border bg-background px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <span className="text-muted">Screening-due status</span>
-            <span className="font-medium text-foreground">{result.screening_due ? "Screening due" : "Not currently due by the configured interval"}</span>
+            <span className="font-medium text-foreground sm:text-right">{result.screening_due ? "Screening due" : "Not currently due by the configured interval"}</span>
           </div>
 
           <section className="flex flex-col gap-3" aria-labelledby={`reasons-${result.cancer_type}`}>

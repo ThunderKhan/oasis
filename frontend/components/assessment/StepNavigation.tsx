@@ -92,6 +92,7 @@ export function StepNavigation({
 }
 
 export function MobileStepProgress({ steps, currentIndex }: { steps: AssessmentStep[]; currentIndex: number }) {
+  const reduceMotion = useReducedMotion()
   const percent = ((currentIndex + 1) / steps.length) * 100
 
   return (
@@ -113,14 +114,9 @@ export function MobileStepProgress({ steps, currentIndex }: { steps: AssessmentS
           className="h-full rounded-full bg-primary"
           initial={false}
           animate={{ width: `${percent}%` }}
-          transition={{ duration: reduceMotionSafeDuration(), ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>
     </div>
   )
-}
-
-function reduceMotionSafeDuration() {
-  if (typeof window === "undefined") return 0.2
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 0.2
 }

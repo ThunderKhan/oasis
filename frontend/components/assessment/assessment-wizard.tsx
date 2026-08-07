@@ -303,11 +303,11 @@ export function AssessmentWizard() {
       const sectionErrors = validateSection(section, input[section])
 
       if (Object.keys(sectionErrors).length > 0) {
-        setErrors(sectionErrors)
         goTo(
           STEPS.findIndex((step) => step.id === section),
           -1,
         )
+        setErrors(sectionErrors)
         return false
       }
     }

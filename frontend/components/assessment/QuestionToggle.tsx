@@ -50,7 +50,7 @@ export function QuestionToggle({
           <span>{label}</span>
         </span>
         {description && (
-          <span id={descriptionId} className="text-xs leading-relaxed text-muted">
+          <span id={descriptionId} className="text-sm leading-relaxed text-muted">
             {description}
           </span>
         )}
@@ -71,7 +71,7 @@ export function QuestionToggle({
               key={id}
               htmlFor={id}
               className={cn(
-                "flex min-h-10 cursor-pointer items-center justify-center rounded-md px-4 text-sm font-semibold transition-colors focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1",
+                "flex min-h-11 cursor-pointer items-center justify-center rounded-md px-4 text-sm font-semibold transition-colors duration-150 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 motion-reduce:transition-none",
                 urgentSelection
                   ? "bg-urgency-referral text-white"
                   : selected

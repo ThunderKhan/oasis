@@ -49,14 +49,14 @@ export function PriorityIndex({ score, priority, showCaveat = true }: PriorityIn
                 className={cn("h-full origin-left", fillClass(priority))}
                 initial={reduceMotion ? { width: `${fill}%` } : { width: 0 }}
                 animate={{ width: `${fill}%` }}
-                transition={{ duration: reduceMotion ? 0 : 0.55, delay: reduceMotion ? 0 : index * 0.04, ease: "easeOut" }}
+                transition={{ duration: reduceMotion ? 0 : 0.35, delay: reduceMotion ? 0 : index * 0.04, ease: [0.22, 1, 0.36, 1] }}
               />
             </div>
           )
         })}
       </div>
 
-      <div className="grid grid-cols-3 gap-y-1 text-[11px] text-muted sm:grid-cols-6">
+      <div className="grid grid-cols-3 gap-y-1 text-xs leading-relaxed text-muted sm:grid-cols-6">
         {SEGMENTS.map((label, index) => (
           <span key={label} className={cn(index === 5 && "text-right sm:text-left")}>{label}</span>
         ))}

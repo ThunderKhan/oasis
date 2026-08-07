@@ -22,7 +22,7 @@ export function ReasonList({ reasons }: { reasons: Reason[] }) {
             initial={reduceMotion ? false : { opacity: 0, y: 5 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: reduceMotion ? 0 : index * 0.05 }}
+            transition={{ delay: reduceMotion ? 0 : index * 0.05, duration: reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
             <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
               <Icon aria-hidden="true" className="size-3.5" />
