@@ -29,3 +29,40 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   )
 }
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://oasis-opal-nine.vercel.app"),
+
+  title: {
+    default: "O.A.S.I.S. — Early Cancer Screening Decision Support",
+    template: "%s | O.A.S.I.S.",
+  },
+
+  description:
+    "Clinical decision-support for oral, breast and cervical cancer screening, referral prioritisation and printable reports.",
+
+  openGraph: {
+    title: "O.A.S.I.S. — Early Cancer Screening Decision Support",
+    description:
+      "Clinical decision-support for oral, breast and cervical cancer screening, referral prioritisation and printable reports.",
+    url: "https://oasis-opal-nine.vercel.app",
+    siteName: "O.A.S.I.S.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "O.A.S.I.S. — Oncology Assessment & Screening Information System",
+      },
+    ],
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "O.A.S.I.S. — Early Cancer Screening Decision Support",
+    description:
+      "Clinical decision-support for oral, breast and cervical cancer screening, referral prioritisation and printable reports.",
+    images: ["/og-image.png"],
+  },
+}
