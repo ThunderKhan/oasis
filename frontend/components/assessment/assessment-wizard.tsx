@@ -36,6 +36,7 @@ import {
   loadSavedStep,
   saveInput,
   saveResult,
+  saveResultTimestamp,
   saveStep,
 } from "@/lib/session-persistence"
 import { validateSection, type FieldErrors } from "@/lib/validation"
@@ -357,6 +358,7 @@ export function AssessmentWizard() {
       const result = await createAssessment(input)
       setResult(result)
       saveResult(result)
+      saveResultTimestamp(new Date().toISOString())
       clearSavedAssessment()
       router.push("/results")
     } catch (caughtError) {

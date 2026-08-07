@@ -53,7 +53,7 @@ export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
   routine: priorityConfig({
     key: "routine",
     label: "Routine",
-    description: "No elevated indicators identified. Continue age-appropriate screening.",
+    description: "No higher-urgency indicators were identified from the information entered. Continue programme-based screening and investigate new or persistent symptoms clinically.",
     icon: CircleCheck,
     textClasses: "text-urgency-routine",
     borderClasses: "border-urgency-routine-border",

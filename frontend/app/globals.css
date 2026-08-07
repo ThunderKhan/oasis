@@ -84,18 +84,57 @@ textarea {
 }
 
 /* Referral print layout — hide chrome, keep clinical content */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
 @media print {
+  html,
   body {
-    background: #ffffff;
+    background: #ffffff !important;
+    color: #111111 !important;
   }
 
-  header,
-  footer {
+  body > header,
+  body > footer,
+  .results-screen,
+  button,
+  nav {
     display: none !important;
   }
 
+  main,
+  main > div {
+    display: block !important;
+  }
+
+  .referral-summary {
+    display: block !important;
+    width: 100%;
+    color: #111111 !important;
+    background: #ffffff !important;
+    font-size: 10pt;
+  }
+
+  .referral-print-header,
+  .referral-pathway,
+  .referral-summary section {
+    break-inside: avoid;
+  }
+
+  .referral-pathway {
+    border-color: #777777 !important;
+  }
+
   a {
-    text-decoration: none;
     color: inherit;
+    text-decoration: none;
+  }
+
+  * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
   }
 }

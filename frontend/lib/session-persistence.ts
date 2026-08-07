@@ -9,6 +9,7 @@ import type { AssessmentInput, AssessmentResponse } from "./assessment-types"
 const INPUT_KEY = "oasis.assessment.input.v1"
 const STEP_KEY = "oasis.assessment.step.v1"
 const RESULT_KEY = "oasis.assessment.result.v1"
+const RESULT_TIME_KEY = "oasis.assessment.result-time.v1"
 
 function safeGet<T>(key: string): T | null {
   if (typeof window === "undefined") return null
@@ -62,6 +63,14 @@ export function saveResult(result: AssessmentResponse) {
   safeSet(RESULT_KEY, result)
 }
 
+export function loadSavedResultTimestamp(): string | null {
+  return safeGet<string>(RESULT_TIME_KEY)
+}
+
+export function saveResultTimestamp(timestamp: string) {
+  safeSet(RESULT_TIME_KEY, timestamp)
+}
+
 export function clearSavedAssessment() {
   safeRemove(INPUT_KEY)
   safeRemove(STEP_KEY)
@@ -69,4 +78,5 @@ export function clearSavedAssessment() {
 
 export function clearSavedResult() {
   safeRemove(RESULT_KEY)
+  safeRemove(RESULT_TIME_KEY)
 }
