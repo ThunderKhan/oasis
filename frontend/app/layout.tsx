@@ -28,17 +28,19 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    title: "O.A.S.I.S. — Early Cancer Screening Decision Support",
-    description:
-      "Clinical decision-support for oral, breast and cervical cancer screening, referral prioritisation and printable reports.",
+  title: "O.A.S.I.S. — Early Cancer Screening Decision Support",
+  description:
+    "Clinical decision-support for oral, breast and cervical cancer screening, referral prioritisation and printable reports.",
     url: "https://oasis-opal-nine.vercel.app",
     siteName: "O.A.S.I.S.",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://oasis-opal-nine.vercel.app/og-image.png",
+        secureUrl: "https://oasis-opal-nine.vercel.app/og-image.png",
         width: 1200,
         height: 630,
-        alt: "O.A.S.I.S. — Oncology Assessment & Screening Information System",
+        type: "image/png",
+        alt: "O.A.S.I.S. — Early Cancer Screening Decision Support",
       },
     ],
     type: "website",
